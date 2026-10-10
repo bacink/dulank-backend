@@ -1,0 +1,20 @@
+[
+  {
+    "id": "rfq-1",
+    "noRequest": "RFQ-001",
+    "customer": "Toko Sumber Rejeki",
+    "email": "sumber@example.test",
+    "telp": "+62811",
+    "date": "05/10/2026, 10:00",
+    "status": "Pending",
+    "document": {
+      "items": [
+        {
+          "description": "HVS A4",
+          "quantity": 5,
+          "unit": "rim"
+        }
+      ]
+    }
+  }
+]

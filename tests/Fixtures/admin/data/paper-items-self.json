@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "groupId": "1",
+    "sizeId": "1",
+    "name": "Art Paper 150gr",
+    "merk": "Pindo Deli",
+    "price": 52000,
+    "priceType": "Group",
+    "unitPrice": "Kg",
+    "gsm": 150,
+    "paperSize": "Plano 65 x 100",
+    "stock": 1500,
+    "unitStock": "Lembar",
+    "update": "10/01/2025 14:00",
+    "status": "Active"
+  }
+]

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Import\AdminDataImporter;
 use App\Services\Import\StoreDataImporter;
 use Illuminate\Console\Command;
 
@@ -19,16 +20,16 @@ class ImportDulankData extends Command
     {
         $source = (string) $this->argument('source');
 
-        if ($source !== 'store') {
-            $this->error('Sumber "admin" belum tersedia (direncanakan pada Fase 3).');
+        if (! in_array($source, ['store', 'admin'], true)) {
+            $this->error('Sumber tidak dikenal. Gunakan "store" atau "admin".');
 
             return self::FAILURE;
         }
 
-        $basePath = (string) ($this->option('path') ?? config('dulank.import.store_path'));
+        $basePath = (string) ($this->option('path') ?? config('dulank.import.'.$source.'_path'));
 
         if ($basePath === '') {
-            $this->error('Lokasi sumber data tidak diketahui. Set DULANK_STORE_PATH di .env atau gunakan --path.');
+            $this->error('Lokasi sumber data tidak diketahui. Set DULANK_'.strtoupper($source).'_PATH di .env atau gunakan --path.');
 
             return self::FAILURE;
         }
@@ -42,9 +43,11 @@ class ImportDulankData extends Command
         $dryRun = (bool) $this->option('dry-run');
         $password = (string) ($this->option('password') ?? env('DULANK_IMPORT_PASSWORD', 'password'));
 
-        $this->info(($dryRun ? '[DRY RUN] ' : '')."Impor data store dari {$basePath}");
+        $this->info(($dryRun ? '[DRY RUN] ' : '')."Impor data {$source} dari {$basePath}");
 
-        $importer = new StoreDataImporter($basePath, $password);
+        $importer = $source === 'store'
+            ? new StoreDataImporter($basePath, $password)
+            : new AdminDataImporter($basePath, $password);
 
         $counts = $importer->import($dryRun, function (string $message): void {
             $this->line('  - '.$message);

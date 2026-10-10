@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -24,12 +25,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::before(function (?User $user): ?bool {
-            if ($user === null) {
+        Gate::before(function (?User $user, string $ability, array $arguments = []): ?bool {
+            if ($user === null || ! $user->isAdmin()) {
                 return null;
             }
 
-            return $user->isAdmin() ? true : null;
+            // Bypass policy hanya untuk pemeriksaan berbasis model/kelas
+            // (ownership). Permission modul (akses tanpa argumen) tetap
+            // dievaluasi oleh spatie/laravel-permission.
+            $subject = $arguments[0] ?? null;
+
+            if ($subject instanceof Model || is_string($subject)) {
+                return true;
+            }
+
+            return null;
         });
 
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)

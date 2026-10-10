@@ -1,0 +1,14 @@
+[
+  {
+    "id": "PRF-01",
+    "key": "ticket",
+    "name": "Ticket",
+    "prefix": "TKT - "
+  },
+  {
+    "id": "PRF-02",
+    "key": "unknown_key",
+    "name": "X",
+    "prefix": "XX - "
+  }
+]

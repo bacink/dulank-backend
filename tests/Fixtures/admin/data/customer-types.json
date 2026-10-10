@@ -1,0 +1,12 @@
+[
+  {
+    "id": "1",
+    "name": "VIP",
+    "status": "Active"
+  },
+  {
+    "id": "2",
+    "name": "Standard",
+    "status": "Active"
+  }
+]

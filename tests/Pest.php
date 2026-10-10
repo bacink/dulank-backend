@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /*
@@ -47,4 +50,29 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Admin dengan satu atau lebih permission modul (untuk endpoint /api/v1/admin/*).
+ */
+function adminWithPermissions(string ...$permissions): User
+{
+    $admin = User::factory()->admin()->create();
+
+    foreach ($permissions as $permission) {
+        Permission::findOrCreate($permission, 'web');
+    }
+
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+    $admin->givePermissionTo($permissions);
+
+    return $admin;
+}
+
+/**
+ * Token ability admin untuk user tertentu.
+ */
+function adminToken(User $user): string
+{
+    return $user->createToken('admin-test', ['admin'])->plainTextToken;
 }

@@ -120,6 +120,6 @@ it('does not hijack a non-store account occupying the same legacy id', function 
         ->and(Product::query()->count())->toBe(1);
 });
 
-it('fails for the admin source until phase 3', function () {
-    $this->artisan('dulank:import', ['source' => 'admin'])->assertFailed();
+it('rejects an unknown import source', function () {
+    $this->artisan('dulank:import', ['source' => 'nonsense'])->assertFailed();
 });

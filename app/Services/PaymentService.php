@@ -9,6 +9,8 @@ use App\Exceptions\ApiException;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\User;
 use App\Support\DocumentNumber;
 use Illuminate\Http\UploadedFile;
@@ -142,17 +144,24 @@ final class PaymentService
     }
 
     /**
-     * Pencatatan pembayaran langsung oleh admin (sales/POS/invoice) — langsung Verified.
+     * Pencatatan pembayaran langsung oleh admin (langsung Verified).
      */
-    public function record(User $admin, Invoice|Order $payable, int $amount, string $method = 'Cash', ?string $date = null, ?string $notes = null): Payment
-    {
-        return DB::transaction(function () use ($admin, $payable, $amount, $method, $date, $notes): Payment {
+    public function record(
+        User $admin,
+        Invoice|Order|Purchase|PurchaseReturn $payable,
+        int $amount,
+        string $method = 'Cash',
+        ?string $date = null,
+        ?string $notes = null,
+        PaymentDirection $direction = PaymentDirection::In,
+    ): Payment {
+        return DB::transaction(function () use ($admin, $payable, $amount, $method, $date, $notes, $direction): Payment {
             $payment = Payment::query()->create([
                 'payable_type' => $payable::class,
                 'payable_id' => $payable->getKey(),
-                'direction' => PaymentDirection::In,
+                'direction' => $direction,
                 'ref_no' => DocumentNumber::next('payment', Payment::query(), 'ref_no', 5),
-                'user_id' => $payable instanceof Invoice ? $payable->user_id : $payable->user_id,
+                'user_id' => $payable instanceof Purchase || $payable instanceof PurchaseReturn ? null : $payable->user_id,
                 'date' => $date ?? now()->toDateString(),
                 'amount' => $amount,
                 'method' => $method,
@@ -179,6 +188,10 @@ final class PaymentService
         } elseif ($payable instanceof Order) {
             $this->recalculateOrder($payable);
             $order = $payable;
+        } elseif ($payable instanceof Purchase) {
+            $this->recalculatePurchase($payable);
+        } elseif ($payable instanceof PurchaseReturn) {
+            $this->recalculatePurchaseReturn($payable);
         }
 
         if ($order !== null) {
@@ -189,6 +202,38 @@ final class PaymentService
                 'created_by' => $admin->id,
             ]);
         }
+    }
+
+    private function recalculatePurchase(Purchase $purchase): void
+    {
+        $paid = (int) $purchase->payments()
+            ->where('status', PaymentVerification::Verified)
+            ->sum('amount');
+        $due = max((int) $purchase->amount - $paid, 0);
+
+        $purchase->forceFill([
+            'paid' => $paid,
+            'due' => $due,
+            'payment_status' => match (true) {
+                $paid <= 0 => 'Unpaid',
+                $due > 0 => 'Partial',
+                default => 'Paid',
+            },
+        ])->save();
+    }
+
+    private function recalculatePurchaseReturn(PurchaseReturn $return): void
+    {
+        $paid = (int) $return->payments()
+            ->where('status', PaymentVerification::Verified)
+            ->sum('amount');
+        $due = max((int) $return->amount - $paid, 0);
+
+        $return->forceFill([
+            'paid' => $paid,
+            'due' => $due,
+            'status' => $due <= 0 && $paid > 0 ? 'Refunded' : $return->status,
+        ])->save();
     }
 
     private function recalculateOrder(Order $order): void

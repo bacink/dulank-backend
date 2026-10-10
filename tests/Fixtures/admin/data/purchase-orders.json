@@ -1,0 +1,28 @@
+[
+  {
+    "id": "po-1",
+    "noPO": "PO-000007",
+    "date": "06/10/2026",
+    "created": "Sales Staff",
+    "noPurchase": "PR-000007",
+    "supplier": "PT Kertas Jaya Makmur",
+    "amount": 3500000,
+    "poStatus": "Sent",
+    "goodsStatus": "Pending",
+    "goodsDate": "",
+    "goodsBy": "Admin",
+    "termOfPayment": "30 Days",
+    "deliveryDate": "06/10/2026",
+    "deliveryAddress": "Gudang Dulank",
+    "vendorReff": "",
+    "taxRate": 0,
+    "items": [
+      {
+        "name": "Art Paper",
+        "qty": 10,
+        "unit": "rim",
+        "price": 350000
+      }
+    ]
+  }
+]

@@ -53,6 +53,22 @@ Endpoint store (prefixed `/api/v1`, alias `/api` untuk yang lama):
 - Commerce: cart (CRUD + clear), wishlist (list/add/delete), orders (list/checkout/detail), quotations (list/create/detail/update), tickets (list/create/detail/reply), invoices (+alias `billings`), payments (list/upload bukti)
 - Akun: profile (show/update), profile/password, profile/2fa (enable/confirm/disable), addresses (CRUD + default), uploads/avatar, uploads/artwork
 
+Endpoint admin (`/api/v1/admin/*`, ability `admin` + permission modul):
+
+- Auth: `auth/login`, `auth/me`, `auth/logout`
+- `orders.manage`: orders (list/detail/status/stats), delivery-notes (CRUD), sales-returns (CRUD + refund)
+- `sales.manage`: sales/POS (list/create/payments/void), quotations (CRUD + `POST {id}/order`), request-quotations (CRUD + duplicate)
+- `finance.manage`: payments (list/record/verify/reject), invoices (list/detail + record payment)
+- `users.manage`: roles (CRUD + permissions), `PUT users/{id}/roles`
+- `purchases.manage`: suppliers (CRUD), purchase-categories, purchase-items, purchases (CRUD + `payments` utang), purchase-orders (CRUD), purchase-returns (CRUD + `payments` refund)
+
+Importer data mock (idempoten, `--dry-run`):
+
+```bash
+php artisan dulank:import store   # 22 JSON dulank-store → tabel kanonik (Fase 1)
+php artisan dulank:import admin   # data/*.json dulank-admin: customer, supplier, store, purchase, paper self, prefix
+```
+
 ## Perintah penting
 
 ```bash
@@ -67,8 +83,9 @@ php artisan route:list --path=api
 
 - ✅ **Fase 0** — fondasi: auth token, roles/permissions, wilayah, settings, importer
 - ✅ **Fase 1** — parity 26 endpoint store + alias `/api` + importer data store
-- ✅ **Fase 2** — checkout `POST /orders` (+ invoice & timeline), quotation CRUD, wishlist add, address CRUD, profil/password/2FA (TOTP), upload avatar/artwork, bukti pembayaran (verifikasi admin menyusul)
-- ⏭️ Fase 3 — admin core (sales, purchases, delivery, finance dasar, verifikasi pembayaran), importer admin
-- ⏭️ Fase 4–5 — finance/HRM/workflow, konten/settings/reports, integrasi
+- ✅ **Fase 2** — checkout `POST /orders` (+ invoice & timeline), quotation CRUD, wishlist add, address CRUD, profil/password/2FA (TOTP), upload avatar/artwork, bukti pembayaran
+- ✅ **Fase 3** — admin operations lengkap: monitoring order + status/stats, verifikasi & pencatatan pembayaran (invoice recalculate), sales/POS, delivery note, sales return (+refund), quotation admin + konversi, RFQ + duplikat, **purchases** (supplier, master item, pembelian + utang, PO, retur + refund), role/permission matrix, activity log, **importer data admin**
+- ⏭️ Fase 4 — finance/HRM/workflow (bank & ledger, cash advance, income/expense, pajak, employee/payroll, flow/job order + insentif)
+- ⏭️ Fase 5 — konten/settings/reports, integrasi (payment gateway/SMS/email), hardening
 
 Catatan: endpoint milik user (cart/orders/tickets/dst.) memerlukan token `store`; halaman store yang belum punya login UI perlu dihubungkan pada sesi adaptasi frontend.

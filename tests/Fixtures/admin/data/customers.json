@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ID000002",
+    "customerId": "ID000002",
+    "name": "Dafa Alfauzi",
+    "email": "dafa@example.test",
+    "type": "VIP",
+    "balance": 150000,
+    "phone": "0812345678",
+    "channel": "Mobile App",
+    "dateJoin": "05/10/2026, 15:19",
+    "lastSeen": "Just now",
+    "status": "Active"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "pr-1",
+    "noPR": "PRT-0015",
+    "date": "06/10/2026",
+    "created": "Sales Staff",
+    "noPurchase": "PR-000120",
+    "supplier": "PT Kertas Jaya Makmur",
+    "amount": 300000,
+    "paid": 0,
+    "due": 300000,
+    "status": "Pending",
+    "statusBy": "Admin",
+    "notes": "",
+    "items": [
+      {
+        "name": "Kertas Art Paper 150gsm",
+        "qty": 14,
+        "returnQty": 2,
+        "unit": "Ream",
+        "price": 150000,
+        "amount": 300000,
+        "reason": "Cacat"
+      }
+    ]
+  }
+]
