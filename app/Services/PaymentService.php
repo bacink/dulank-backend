@@ -6,9 +6,13 @@ use App\Enums\PaymentDirection;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentVerification;
 use App\Exceptions\ApiException;
+use App\Models\BankAccount;
+use App\Models\CustomerAccountEntry;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Payslip;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\User;
@@ -23,7 +27,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class PaymentService
 {
-    public function __construct(private readonly MediaService $media) {}
+    public function __construct(
+        private readonly MediaService $media,
+        private readonly LedgerService $ledger,
+    ) {}
 
     /**
      * Pengajuan bukti pembayaran dari store (status Pending).
@@ -148,23 +155,25 @@ final class PaymentService
      */
     public function record(
         User $admin,
-        Invoice|Order|Purchase|PurchaseReturn $payable,
+        Invoice|Order|Purchase|PurchaseReturn|Expense|Payslip $payable,
         int $amount,
         string $method = 'Cash',
         ?string $date = null,
         ?string $notes = null,
         PaymentDirection $direction = PaymentDirection::In,
+        ?int $bankAccountId = null,
     ): Payment {
-        return DB::transaction(function () use ($admin, $payable, $amount, $method, $date, $notes, $direction): Payment {
+        return DB::transaction(function () use ($admin, $payable, $amount, $method, $date, $notes, $direction, $bankAccountId): Payment {
             $payment = Payment::query()->create([
                 'payable_type' => $payable::class,
                 'payable_id' => $payable->getKey(),
                 'direction' => $direction,
                 'ref_no' => DocumentNumber::next('payment', Payment::query(), 'ref_no', 5),
-                'user_id' => $payable instanceof Purchase || $payable instanceof PurchaseReturn ? null : $payable->user_id,
+                'user_id' => $payable instanceof Invoice || $payable instanceof Order ? $payable->user_id : null,
                 'date' => $date ?? now()->toDateString(),
                 'amount' => $amount,
                 'method' => $method,
+                'bank_account_id' => $bankAccountId,
                 'status' => PaymentVerification::Verified,
                 'verified_at' => now(),
                 'verified_by' => $admin->id,
@@ -192,6 +201,15 @@ final class PaymentService
             $this->recalculatePurchase($payable);
         } elseif ($payable instanceof PurchaseReturn) {
             $this->recalculatePurchaseReturn($payable);
+        } elseif ($payable instanceof Expense) {
+            $this->recalculateExpense($payable);
+        } elseif ($payable instanceof Payslip) {
+            $this->recalculatePayslip($payable);
+        }
+
+        if ($payment->status === PaymentVerification::Verified) {
+            $this->writeLedgerEntry($payment);
+            $this->writeCustomerEntry($payment, $order);
         }
 
         if ($order !== null) {
@@ -202,6 +220,76 @@ final class PaymentService
                 'created_by' => $admin->id,
             ]);
         }
+    }
+
+    private function writeLedgerEntry(Payment $payment): void
+    {
+        if ($payment->bank_account_id === null) {
+            return;
+        }
+
+        $account = BankAccount::query()->find($payment->bank_account_id);
+
+        if ($account === null) {
+            return;
+        }
+
+        $this->ledger->record(
+            $account,
+            $payment->direction === PaymentDirection::Out ? 'debit' : 'credit',
+            (int) $payment->amount,
+            'payment',
+            $payment->id,
+            'Pembayaran '.$payment->ref_no,
+            $payment->date?->startOfDay(),
+        );
+    }
+
+    private function writeCustomerEntry(Payment $payment, ?Order $order): void
+    {
+        if ($order === null || $order->customer_id === null) {
+            return;
+        }
+
+        CustomerAccountEntry::query()->create([
+            'customer_id' => $order->customer_id,
+            'source_type' => 'payment',
+            'source_id' => $payment->id,
+            'amount' => (int) $payment->amount,
+            'occurred_at' => now(),
+            'note' => 'Pembayaran '.$payment->ref_no,
+        ]);
+    }
+
+    private function recalculateExpense(Expense $expense): void
+    {
+        $paid = (int) $expense->payments()
+            ->where('status', PaymentVerification::Verified)
+            ->sum('amount');
+        $due = max((int) $expense->amount - $paid, 0);
+
+        $expense->forceFill([
+            'paid' => $paid,
+            'due' => $due,
+            'status' => match (true) {
+                $paid <= 0 => 'Unpaid',
+                $due > 0 => 'Partial',
+                default => 'Paid',
+            },
+        ])->save();
+    }
+
+    private function recalculatePayslip(Payslip $payslip): void
+    {
+        $paid = (int) $payslip->payments()
+            ->where('status', PaymentVerification::Verified)
+            ->sum('amount');
+        $isPaid = $paid >= (int) $payslip->total && (int) $payslip->total > 0;
+
+        $payslip->forceFill([
+            'status' => $isPaid ? 'Paid' : $payslip->status,
+            'paid_date' => $isPaid ? ($payslip->paid_date ?? now()->toDateString()) : $payslip->paid_date,
+        ])->save();
     }
 
     private function recalculatePurchase(Purchase $purchase): void

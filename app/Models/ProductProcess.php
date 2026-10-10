@@ -12,7 +12,7 @@ class ProductProcess extends Model
     /** @use HasFactory<ProductProcessFactory> */
     use HasFactory;
 
-    protected $fillable = ['product_id', 'code', 'process_name', 'image_path'];
+    protected $fillable = ['product_id', 'code', 'process_name', 'image_path', 'status'];
 
     /**
      * @return BelongsTo<Product, $this>

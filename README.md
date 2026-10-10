@@ -55,12 +55,24 @@ Endpoint store (prefixed `/api/v1`, alias `/api` untuk yang lama):
 
 Endpoint admin (`/api/v1/admin/*`, ability `admin` + permission modul):
 
-- Auth: `auth/login`, `auth/me`, `auth/logout`
+- Auth: `auth/login`, `auth/me`, `auth/logout`, `profile` (show/update/password), `uploads/avatar`, `uploads/image`
 - `orders.manage`: orders (list/detail/status/stats), delivery-notes (CRUD), sales-returns (CRUD + refund)
-- `sales.manage`: sales/POS (list/create/payments/void), quotations (CRUD + `POST {id}/order`), request-quotations (CRUD + duplicate)
-- `finance.manage`: payments (list/record/verify/reject), invoices (list/detail + record payment)
-- `users.manage`: roles (CRUD + permissions), `PUT users/{id}/roles`
+- `finance.manage`: payments (list/record/verify/reject), invoices (list/detail + record payment), bank-account-types & bank-accounts (CRUD + ledger + statement), money-transfers, cash-advances (+installments), income-categories & incomes (+cancel), expense-categories & expenses (+payments), input-taxes & output-taxes, tax-rates (CRUD), `finance/summary`, `finance/cash-flow`, `finance/customer-entries` (+balance)
+- `users.manage`: roles (CRUD + permissions), `PUT users/{id}/roles`, users/members (list/update/delete), user-admins (CRUD)
+- `products.manage`: products (CRUD + varian + gambar + price range otomatis), categories, sub-categories, units, variants (master), product-processes, workshop-services, **paper-groups/items/sizes/prices, printing-machines, die-cutting-blades, calculator-components (fiks/minimum/jasa-lain), profit-tiers, calculator/partners, calculator/listings (+freeze & moderation-history), calculator/dashboard**
+- `sales.manage`: sales/POS (list/create/payments/void), quotations (CRUD + `POST {id}/order`), request-quotations (CRUD + duplicate), banners, coupons, vouchers, discount-plans, discounts, `pos/products`, `pos/held-orders`
+- `orders.manage`: orders (list/detail/status/stats), delivery-notes (CRUD), sales-returns (CRUD + refund), **webstore/carts, webstore/checkout, webstore/wishlist, webstore/reviews (+stats), webstore/contact-forms (+stats)**
+- `peoples.manage`: customers (CRUD + saldo derived), customer-types, stores, addresses (polymorphic customer/supplier + stats)
 - `purchases.manage`: suppliers (CRUD), purchase-categories, purchase-items, purchases (CRUD + `payments` utang), purchase-orders (CRUD), purchase-returns (CRUD + `payments` refund)
+- `hrm.manage`: departments & designations (CRUD), employees (CRUD), employee-salaries (upsert + allowances), payslips (`generate` + `{slipNo}/pay`), incentives (CRUD + `pay`)
+- `workflow.manage`: flow-categories/flow-names/flow-templates (CRUD), work-flows (+steps), job-orders (+steps + `status`), job-branches (CRUD + `{id}/complete` → riwayat + insentif), job-progress, `job-list`, `my-jobs`, my-incentives
+- `content.manage`: blogs/blogs-categories/tags/comments, faqs + categories, clients, download-files (+upload), footer, appearance
+- `settings.manage`: `settings/{group}` (read/update), custom-fields, ban-ips, languages (+translations), `gateways/{group}` (payment-gateways, sms-gateways)
+- `reports.view`: dashboard, `reports/{type}` (15 tipe: sales, purchases, finance, products, customers, annual, best-seller, customer-dues, supplier-dues, suppliers, taxes, profit-loss, invoices, expenses, incomes), `reports/{type}/export` (CSV default, `?format=xlsx` untuk Excel)
+
+Dokumen cetak PDF (`?` lihat grup permission masing-masing): `invoices/{no}/pdf`, `quotations/{no}/pdf`, `delivery-notes/{no}/pdf`, `payslips/{no}/pdf`, `purchases/{no}/pdf`.
+
+Keamanan tambahan: middleware `BlockBannedIp` menolak request dari IP di tabel `ban_ips` (cache 5 menit, otomatis invalid saat ban dibuat/dihapus).
 
 Importer data mock (idempoten, `--dry-run`):
 
@@ -85,7 +97,9 @@ php artisan route:list --path=api
 - ✅ **Fase 1** — parity 26 endpoint store + alias `/api` + importer data store
 - ✅ **Fase 2** — checkout `POST /orders` (+ invoice & timeline), quotation CRUD, wishlist add, address CRUD, profil/password/2FA (TOTP), upload avatar/artwork, bukti pembayaran
 - ✅ **Fase 3** — admin operations lengkap: monitoring order + status/stats, verifikasi & pencatatan pembayaran (invoice recalculate), sales/POS, delivery note, sales return (+refund), quotation admin + konversi, RFQ + duplikat, **purchases** (supplier, master item, pembelian + utang, PO, retur + refund), role/permission matrix, activity log, **importer data admin**
-- ⏭️ Fase 4 — finance/HRM/workflow (bank & ledger, cash advance, income/expense, pajak, employee/payroll, flow/job order + insentif)
-- ⏭️ Fase 5 — konten/settings/reports, integrasi (payment gateway/SMS/email), hardening
+- ✅ **Fase 4A — Finance**: bank account + buku besar (saldo = opening + credit − debit), money transfer (2 entri ledger), cash advance + cicilan, income/expense (+pajak input/output), saldo customer dari `customer_account_entries` (otomatis dari checkout & pembayaran terverifikasi), laporan ringkas & arus kas
+- ✅ **Fase 4B — HRM & Workflow**: department/designation/employee, payroll (gaji + tunjangan → payslip → bayar via payment/ledger), insentif, flow category/name/template, work flow + steps, job order + steps, job branch (+complete → riwayat + insentif per assignee dari `flow_names.incentive × qty`), job progress, my-incentives
+- ✅ **Fase 5 — Konten, Settings, Reports**: blog/FAQ/client/download/footer/appearance CRUD, settings per grup (`settings/{group}`), custom fields, ban IP (+enforcement middleware), bahasa + terjemahan (progress), dashboard admin, laporan agregat (sales/purchases/finance/products/customers) + export CSV/Excel, dokumen cetak PDF (invoice, quotation, delivery note, payslip, purchase)
+- ⏭️ Sisa: integrasi aktual payment gateway/SMS/email (konfigurasi & daftar gateway sudah tersedia via settings), worker queue produksi, dan **adaptasi frontend** (proxy `/api` + login UI store, adapter admin per modul)
 
 Catatan: endpoint milik user (cart/orders/tickets/dst.) memerlukan token `store`; halaman store yang belum punya login UI perlu dihubungkan pada sesi adaptasi frontend.

@@ -26,6 +26,7 @@ class RolePermissionSeeder extends Seeder
         'content.manage',
         'settings.manage',
         'users.manage',
+        'peoples.manage',
         'reports.view',
     ];
 

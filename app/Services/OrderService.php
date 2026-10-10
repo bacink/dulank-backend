@@ -10,6 +10,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Exceptions\ApiException;
 use App\Models\CartItem;
+use App\Models\CustomerAccountEntry;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\User;
@@ -89,6 +90,17 @@ final class OrderService
             CartItem::query()
                 ->whereIn('id', $lines->pluck('cart_item_id'))
                 ->update(['status' => CartItemStatus::Checkout]);
+
+            if ($order->customer_id !== null) {
+                CustomerAccountEntry::query()->create([
+                    'customer_id' => $order->customer_id,
+                    'source_type' => 'sale',
+                    'source_id' => $order->id,
+                    'amount' => $total,
+                    'occurred_at' => now(),
+                    'note' => 'Order '.$order->number,
+                ]);
+            }
 
             return $order->load(['items', 'statusHistories', 'invoices']);
         });
