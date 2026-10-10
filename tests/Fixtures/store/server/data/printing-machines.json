@@ -1,0 +1,14 @@
+[
+  {
+    "id": 2,
+    "kind": "printing",
+    "source": "Milik Sendiri",
+    "name": "Heidelberg GTO52 4 Warna",
+    "size": "52x72 cm",
+    "price": 240000,
+    "unitPrice": 60,
+    "updatedAt": "2025-06-13",
+    "published": true,
+    "active": true
+  }
+]

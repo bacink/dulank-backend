@@ -1,0 +1,41 @@
+[
+  {
+    "id": "SO-1",
+    "userId": 7,
+    "status": "delivered",
+    "date": "2025-04-14",
+    "items": [
+      {
+        "productId": 5,
+        "name": "Brosur PPDN",
+        "category": "Brosur",
+        "quantity": 100,
+        "price": 65000,
+        "total": 6500000,
+        "spec": "A4"
+      }
+    ],
+    "shippingAddress": {
+      "name": "Ahmad Dhani",
+      "phone": "(+62) 852053769",
+      "type": "Office",
+      "street": "515 Sarah Shore",
+      "district": "TELUK JAMBE TIMUR",
+      "city": "KAB. KARAWANG",
+      "province": "JAWA BARAT",
+      "postalCode": "41360",
+      "country": "ID"
+    },
+    "total": 6500000,
+    "timeline": [
+      {
+        "status": "ordered",
+        "date": "2025-04-10 09:00 WIB"
+      },
+      {
+        "status": "delivered",
+        "date": "2025-04-14 14:00 WIB"
+      }
+    ]
+  }
+]

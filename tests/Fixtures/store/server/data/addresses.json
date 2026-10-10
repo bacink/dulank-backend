@@ -1,0 +1,16 @@
+[
+  {
+    "id": 3,
+    "userId": 7,
+    "recipientName": "Ahmad Dhani",
+    "phone": "(+62) 852053769",
+    "type": "Office",
+    "name": "Toko Kelontong",
+    "street": "515 Sarah Shore",
+    "district": "TELUK JAMBE TIMUR",
+    "city": "KAB. KARAWANG",
+    "province": "JAWA BARAT",
+    "postalCode": "41360",
+    "country": "ID"
+  }
+]

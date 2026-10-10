@@ -1,0 +1,29 @@
+[
+  {
+    "id": "QT-1",
+    "userId": 7,
+    "date": "2025-05-01",
+    "validUntil": "2025-05-31",
+    "status": "accepted",
+    "items": [
+      {
+        "productId": 5,
+        "name": "Brosur PPDN",
+        "category": "Brosur",
+        "quantity": 500,
+        "spec": "A4",
+        "unitPrice": 45000,
+        "total": 22500000
+      }
+    ],
+    "customerInfo": {
+      "name": "PT. Maju Jaya",
+      "email": "info@majujaya.com",
+      "phone": "+6281234567890"
+    },
+    "subtotal": 22500000,
+    "tax": 2475000,
+    "shippingCost": 0,
+    "total": 24975000
+  }
+]

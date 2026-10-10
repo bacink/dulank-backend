@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "source": "Milik Sendiri",
+    "name": "HVS 70 GSM",
+    "group": "HVS",
+    "price": 350000,
+    "updatedAt": "2025-06-13",
+    "published": true,
+    "active": true
+  }
+]

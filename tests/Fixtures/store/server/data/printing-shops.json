@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "Percetakan Grafika",
+    "province": "DKI Jakarta",
+    "city": "Jakarta Pusat",
+    "district": "Kemayoran",
+    "followers": "5,3RB",
+    "following": 195,
+    "paperCount": 117,
+    "printingCount": 4,
+    "laminationCount": 2,
+    "dieCuttingCount": 4,
+    "foilCount": 8,
+    "image": "/images/tab.png"
+  }
+]

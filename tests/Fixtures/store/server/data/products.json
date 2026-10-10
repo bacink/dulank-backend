@@ -1,0 +1,25 @@
+[
+  {
+    "id": 5,
+    "name": "Brosur Full Color A4",
+    "slug": "brosur-full-color-a4",
+    "categoryId": 3,
+    "description": "Cetak brosur full color",
+    "priceFrom": 50000,
+    "priceTo": 300000,
+    "image": "/images/brosur.jpg",
+    "specs": [
+      {
+        "group": "Ukuran",
+        "options": [
+          "A4",
+          "A5"
+        ]
+      }
+    ],
+    "tags": [
+      "brosur",
+      "full-color"
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "cart-1",
+    "productId": 5,
+    "name": "Brosur Full Color A4",
+    "image": "/images/brosur.jpg",
+    "quantity": 2,
+    "price": 50000,
+    "spec": "A4"
+  }
+]

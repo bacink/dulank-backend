@@ -1,0 +1,16 @@
+[
+  {
+    "id": 2,
+    "slug": "tips-cetak-brosur",
+    "title": "Tips Cetak Brosur",
+    "excerpt": "Panduan cetak",
+    "content": "Isi artikel",
+    "date": "2025-05-05",
+    "author": "Dulank Team",
+    "image": "/images/brosur.jpg",
+    "tags": [
+      "cetak",
+      "brosur"
+    ]
+  }
+]

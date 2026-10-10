@@ -1,0 +1,19 @@
+[
+  {
+    "id": "TK-001",
+    "userId": 7,
+    "subject": "Pesanan belum diterima",
+    "type": "Complaint",
+    "message": "Sudah 5 hari belum diterima.",
+    "priority": "high",
+    "status": "open",
+    "date": "2025-04-15",
+    "replies": [
+      {
+        "from": "support",
+        "message": "Kami tindak lanjuti.",
+        "date": "2025-04-15"
+      }
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "userId": 7,
+    "productId": 5,
+    "name": "Brosur Full Color A4",
+    "image": "/images/brosur.jpg",
+    "price": 50000,
+    "spec": "A4",
+    "addedAt": "2025-05-01",
+    "expireDate": "25/6/2025",
+    "expired": false
+  }
+]

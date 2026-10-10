@@ -1,0 +1,10 @@
+[
+  {
+    "id": 3,
+    "name": "Promotion",
+    "slug": "brosur-digital",
+    "description": "Media promosi",
+    "image": "/images/brosur.jpg",
+    "productCount": 15
+  }
+]
