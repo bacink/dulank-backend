@@ -355,6 +355,7 @@ Route::prefix('admin')->group(function (): void {
             Route::post('flow-templates', [WorkflowController::class, 'storeTemplate']);
             Route::delete('flow-templates/{flowTemplate}', [WorkflowController::class, 'destroyTemplate']);
 
+            Route::get('work-flow-context', [WorkflowController::class, 'context']);
             Route::get('work-flows', [JobOrderController::class, 'workFlows']);
             Route::post('work-flows', [JobOrderController::class, 'storeWorkFlow']);
             Route::put('work-flows/{workFlow}', [JobOrderController::class, 'updateWorkFlow']);
@@ -508,6 +509,7 @@ Route::prefix('admin')->group(function (): void {
             Route::post('calculator/partners', [CalculatorController::class, 'storePartner']);
             Route::put('calculator/partners/{partner}', [CalculatorController::class, 'updatePartner']);
             Route::delete('calculator/partners/{partner}', [CalculatorController::class, 'destroyPartner']);
+            Route::post('calculator/partners/{partner}/moderate', [CalculatorController::class, 'moderatePartner']);
 
             Route::get('calculator/listings', [CalculatorController::class, 'listings']);
             Route::post('calculator/listings/{listing}/freeze', [CalculatorController::class, 'freezeListing']);

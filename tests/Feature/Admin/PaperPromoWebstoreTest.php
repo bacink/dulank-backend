@@ -335,3 +335,21 @@ it('manages support tickets end to end', function () {
 
     $this->assertDatabaseMissing('support_tickets', ['id' => $id]);
 });
+
+it('moderates a calculator partner', function () {
+    $token = adminToken(adminWithPermissions('products.manage'));
+
+    $created = $this->withToken($token)->postJson('/api/v1/admin/calculator/partners', [
+        'name' => 'Partner Smoke', 'type' => 'printing_shop', 'city' => 'Karawang', 'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.name', 'Partner Smoke');
+
+    $id = $created->json('data.id');
+
+    $this->withToken($token)->postJson("/api/v1/admin/calculator/partners/{$id}/moderate", [
+        'status' => 'Inactive', 'note' => 'Menunggu verifikasi dokumen',
+    ])->assertOk()
+        ->assertJsonPath('data.status', 'Inactive');
+
+    $this->assertDatabaseHas('partners', ['id' => $id, 'status' => 'Inactive']);
+});

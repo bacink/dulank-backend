@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminIndexRequest;
+use App\Models\Category;
 use App\Models\FlowCategory;
 use App\Models\FlowName;
 use App\Models\FlowTemplate;
+use App\Models\Product;
 use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -199,5 +201,31 @@ class WorkflowController extends Controller
             'flowType' => $flowName->flow_type,
             'assignees' => $flowName->assignees ?? [],
         ];
+    }
+
+    /**
+     * Konteks editor alur kerja: produk, kategori, kategori alur, nama alur & template.
+     */
+    public function context(): JsonResponse
+    {
+        return ApiResponse::success([
+            'products' => Product::query()->where('status', 'Active')->limit(200)->get(['id', 'code', 'name', 'category_id'])
+                ->map(fn (Product $product) => [
+                    'id' => (string) $product->id,
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'category' => $product->category?->name,
+                ])->values(),
+            'productCategories' => Category::query()->orderBy('name')->pluck('name')->values(),
+            'flowCategories' => FlowCategory::query()->orderBy('name')->pluck('name')->values(),
+            'flows' => FlowName::query()->with('category')->orderBy('name')->limit(200)->get()
+                ->map(fn (FlowName $flow) => [
+                    'id' => (string) $flow->id,
+                    'name' => $flow->name,
+                    'category' => $flow->category?->name,
+                    'templateNames' => [],
+                ])->values(),
+            'templates' => FlowTemplate::query()->orderBy('name')->pluck('name')->values(),
+        ]);
     }
 }

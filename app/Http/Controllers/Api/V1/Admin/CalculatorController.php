@@ -201,6 +201,20 @@ class CalculatorController extends Controller
         return ApiResponse::success(['id' => (string) $partner->id, 'removed' => true]);
     }
 
+    public function moderatePartner(Request $request, Partner $partner): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive,Flagged'],
+            'note' => ['sometimes', 'nullable', 'string', 'max:1000'],
+        ]);
+
+        $partner->forceFill([
+            'status' => $validated['status'] ?? $partner->status,
+        ])->save();
+
+        return ApiResponse::success($this->partnerPayload($partner->refresh()));
+    }
+
     public function listings(AdminIndexRequest $request): JsonResponse
     {
         $query = Listing::query()->with('partner');

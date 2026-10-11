@@ -230,3 +230,11 @@ function createJobOrder(FlowName $flowName): JobOrder
         'status' => 'On Process',
     ]);
 }
+
+it('provides workflow editor context', function () {
+    $token = adminToken(adminWithPermissions('workflow.manage'));
+
+    $this->withToken($token)->getJson('/api/v1/admin/work-flow-context')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['products', 'productCategories', 'flowCategories', 'flows', 'templates']]);
+});
