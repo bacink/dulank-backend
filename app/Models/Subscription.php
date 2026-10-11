@@ -16,9 +16,14 @@ class Subscription extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'subscriber', 'plan', 'plan_tier', 'billing_cycle', 'payment_method',
+        'customer_id', 'subscriber', 'plan', 'plan_tier', 'billing_cycle', 'payment_method',
         'amount', 'created_date', 'expiring_on', 'status',
     ];
+
+    public function customer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
 
     /**
      * @return array<string, string>

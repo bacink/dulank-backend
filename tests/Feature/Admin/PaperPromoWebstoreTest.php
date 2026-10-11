@@ -377,3 +377,30 @@ it('lists and updates subscriptions with summary', function () {
         ->assertJsonPath('data.status', 'Unpaid')
         ->assertJsonPath('data.amount', 900000);
 });
+
+it('relates subscriptions to customers end to end', function () {
+    $token = adminToken(adminWithPermissions('orders.manage'));
+
+    $customer = App\Models\Customer::query()->create(['code' => 'CST-SUB-001']);
+
+    $created = $this->withToken($token)->postJson('/api/v1/admin/subscriptions', [
+        'customerId' => $customer->id, 'plan' => 'Advanced', 'planTier' => 'Advanced',
+        'billingCycle' => '365 Days', 'paymentMethod' => 'Credit Card',
+        'amount' => 1200000, 'expiringOn' => now()->addYear()->toDateString(), 'status' => 'Paid',
+    ])->assertCreated()
+        ->assertJsonPath('data.amount', 1200000);
+
+    $this->withToken($token)->getJson('/api/v1/admin/customer-subscriptions')
+        ->assertOk()
+        ->assertJsonStructure(['data' => [['customerId', 'customer', 'email', 'plan', 'status', 'active']], 'summary' => ['totalSubscribers', 'activeSubscribers', 'expiredSubscribers']])
+        ->assertJsonPath('summary.activeSubscribers', 1);
+
+    $row = collect($this->withToken($token)->getJson('/api/v1/admin/customer-subscriptions')->json('data'))
+        ->firstWhere('customerId', (string) $customer->id);
+
+    $this->assertSame('Advanced', $row['plan']);
+    $this->assertTrue($row['active']);
+    $this->assertSame('Paid', $row['status']);
+
+    $this->assertDatabaseHas('subscriptions', ['customer_id' => $customer->id, 'status' => 'Paid']);
+});

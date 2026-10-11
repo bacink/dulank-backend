@@ -22,6 +22,11 @@ class Customer extends Model
         'last_seen',
     ];
 
+    public function subscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
     /**
      * @return array<string, string>
      */

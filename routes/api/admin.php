@@ -34,9 +34,9 @@ use App\Http\Controllers\Api\V1\Admin\ProductController;
 use App\Http\Controllers\Api\V1\Admin\PromoController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseCategoryController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseController;
-use App\Http\Controllers\Api\V1\Admin\PurchaseReturnController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseItemController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseOrderController;
+use App\Http\Controllers\Api\V1\Admin\PurchaseReturnController;
 use App\Http\Controllers\Api\V1\Admin\QuotationController;
 use App\Http\Controllers\Api\V1\Admin\RegionController;
 use App\Http\Controllers\Api\V1\Admin\ReportController;
@@ -604,7 +604,9 @@ Route::prefix('admin')->group(function (): void {
             Route::put('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'updateSupportTicket']);
             Route::delete('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'destroySupportTicket']);
 
+            Route::get('customer-subscriptions', [SubscriptionController::class, 'customerIndex']);
             Route::get('subscriptions', [SubscriptionController::class, 'index']);
+            Route::post('subscriptions', [SubscriptionController::class, 'store']);
             Route::put('subscriptions/{subscription}', [SubscriptionController::class, 'update']);
         });
     });
