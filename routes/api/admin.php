@@ -484,6 +484,9 @@ Route::prefix('admin')->group(function (): void {
         // Dashboard & laporan.
         Route::middleware('permission:reports.view')->group(function (): void {
             Route::get('dashboard', [DashboardController::class, 'index']);
+            Route::get('dashboard/admin', [DashboardController::class, 'adminStats']);
+            Route::get('dashboard/sales', [DashboardController::class, 'salesStats']);
+            Route::get('dashboard/analytics', [DashboardController::class, 'analyticsStats']);
             Route::get('reports/{type}', [ReportController::class, 'show']);
             Route::get('reports/{type}/export', [ReportController::class, 'export']);
         });

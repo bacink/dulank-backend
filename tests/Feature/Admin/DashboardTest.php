@@ -70,3 +70,19 @@ it('returns dashboard KPIs, recent orders, top products and monthly trend', func
             ],
         ]);
 });
+
+it('serves admin, sales and analytics dashboard stats', function () {
+    $token = adminToken(adminWithPermissions('reports.view'));
+
+    $this->withToken($token)->getJson('/api/v1/admin/dashboard/admin')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['welcomeName', 'ordersToday', 'primaryMetrics', 'overview', 'chartSeries', 'salesStatics', 'categoryTotals']]);
+
+    $this->withToken($token)->getJson('/api/v1/admin/dashboard/sales')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['bestSellers', 'recentTransactions', 'countryMarkers']]);
+
+    $this->withToken($token)->getJson('/api/v1/admin/dashboard/analytics')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['kpis', 'conversion', 'performance', 'browsers', 'regions', 'topPages']]);
+});

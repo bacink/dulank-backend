@@ -297,6 +297,38 @@ class CalculatorController extends Controller
 
     public function dashboard(): JsonResponse
     {
+        $labels = [];
+        $thisWeek = [];
+        $lastWeek = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $day = now()->subDays($i)->toDateString();
+            $labels[] = now()->subDays($i)->format('D');
+            $thisWeek[] = RequestQuotation::query()->whereDate('created_at', $day)->count();
+            $lastWeek[] = Listing::query()->whereDate('created_at', $day)->count();
+        }
+
+        $users = Partner::query()
+            ->withCount('listings')
+            ->orderByDesc('listings_count')
+            ->limit(20)
+            ->get()
+            ->map(fn (Partner $partner) => [
+                'id' => (int) $partner->id,
+                'userId' => (string) $partner->id,
+                'user' => $partner->name,
+                'calculate' => (int) $partner->listings_count,
+                'request' => 0,
+                'usage' => (int) $partner->listings_count,
+                'status' => 'Active',
+                'role' => 'partner',
+                'lastActive' => $partner->updated_at?->toIso8601String(),
+                'departmentId' => '',
+                'employeeId' => '',
+                'createdAt' => $partner->created_at?->toIso8601String(),
+                'updatedAt' => $partner->updated_at?->toIso8601String(),
+            ])->values();
+
         return ApiResponse::success([
             'telemetry' => [
                 'currentUsers' => User::query()->where('type', 'store')->where('status', 'Active')->count(),
@@ -304,8 +336,9 @@ class CalculatorController extends Controller
                 'totalCalculate' => Listing::query()->count(),
                 'requestGrowth' => '0%',
                 'calculateGrowth' => '0%',
+                'chart' => ['labels' => $labels, 'thisWeek' => $thisWeek, 'lastWeek' => $lastWeek],
             ],
-            'users' => [],
+            'users' => $users,
         ]);
     }
 
