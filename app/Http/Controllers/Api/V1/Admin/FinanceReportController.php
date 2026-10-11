@@ -121,4 +121,53 @@ class FinanceReportController extends Controller
             'balance' => $sales + $adjustments - $payments,
         ]);
     }
+
+    /**
+     * Neraca (balance sheet) ringkas dari ledger, piutang, stok pembelian,
+     * dan laba ditahan (pendapatan − beban).
+     */
+    public function balanceSheet(): JsonResponse
+    {
+        $cashAndBank = (int) BankAccount::query()->get()
+            ->sum(fn ($account) => app(LedgerService::class)->balance($account));
+        $receivables = (int) Invoice::query()->sum('amount_due');
+        $inventory = (int) Purchase::query()->sum('amount');
+        $payables = (int) Purchase::query()->sum('due');
+        $incomeTotal = (int) Income::query()->where('is_cancelled', false)->sum('amount');
+        $expenseTotal = (int) Expense::query()->sum('paid');
+
+        $totalCurrentAssets = $cashAndBank + $receivables + $inventory;
+        $totalAssets = $totalCurrentAssets;
+        $totalLiabilities = $payables;
+        $retainedEarnings = $incomeTotal - $expenseTotal;
+        $totalEquity = $retainedEarnings;
+        $totalLiabilitiesAndEquity = $totalLiabilities + $totalEquity;
+
+        return ApiResponse::success([
+            'asOfDate' => now()->toDateString(),
+            'assets' => [
+                'cashAndBank' => $cashAndBank,
+                'receivables' => $receivables,
+                'inventory' => $inventory,
+                'machinery' => 0,
+                'depreciation' => 0,
+                'totalCurrentAssets' => $totalCurrentAssets,
+                'totalFixedAssets' => 0,
+                'totalAssets' => $totalAssets,
+            ],
+            'liabilities' => [
+                'payables' => $payables,
+                'accruedExpenses' => 0,
+                'totalLiabilities' => $totalLiabilities,
+            ],
+            'equity' => [
+                'ownerCapital' => 0,
+                'retainedEarnings' => $retainedEarnings,
+                'totalEquity' => $totalEquity,
+            ],
+            'totalLiabilitiesAndEquity' => $totalLiabilitiesAndEquity,
+            'balanced' => $totalAssets === $totalLiabilitiesAndEquity,
+            'notes' => ['Perhitungan ringkas dari ledger bank, piutang, stok pembelian, dan laba ditahan.'],
+        ]);
+    }
 }

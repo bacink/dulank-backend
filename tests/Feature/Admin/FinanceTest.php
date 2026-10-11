@@ -327,3 +327,17 @@ it('manages income and expense categories with update and delete', function () {
 
     $this->assertDatabaseMissing('expense_categories', ['name' => 'Operasional Lain']);
 });
+
+it('builds a balanced summary balance sheet', function () {
+    $token = adminToken(adminWithPermissions('finance.manage'));
+
+    $this->withToken($token)->getJson('/api/v1/admin/finance/balance-sheet')
+        ->assertOk()
+        ->assertJsonStructure([
+            'data' => [
+                'asOfDate', 'assets', 'liabilities', 'equity',
+                'totalLiabilitiesAndEquity', 'balanced', 'notes',
+            ],
+        ])
+        ->assertJsonPath('data.balanced', true);
+});

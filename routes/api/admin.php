@@ -176,6 +176,7 @@ Route::prefix('admin')->group(function (): void {
             // Laporan kеuangan.
             Route::get('finance/summary', [FinanceReportController::class, 'summary']);
             Route::get('finance/cash-flow', [FinanceReportController::class, 'cashFlow']);
+            Route::get('finance/balance-sheet', [FinanceReportController::class, 'balanceSheet']);
             Route::get('finance/customer-entries', [FinanceReportController::class, 'customerEntries']);
             Route::get('finance/customer-entries/{customerId}/balance', [FinanceReportController::class, 'customerBalance']);
 
