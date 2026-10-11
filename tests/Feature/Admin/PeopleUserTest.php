@@ -204,3 +204,11 @@ it('creates, updates and deletes customer types', function () {
 
     $this->assertDatabaseMissing('customer_types', ['name' => 'Litografi']);
 });
+
+it('serves region reference lists', function () {
+    $token = adminToken(adminWithPermissions('peoples.manage'));
+
+    $this->withToken($token)->getJson('/api/v1/admin/provinces')
+        ->assertOk()
+        ->assertJsonStructure(['data' => []]);
+});

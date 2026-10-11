@@ -35,8 +35,8 @@ use App\Http\Controllers\Api\V1\Admin\PurchaseCategoryController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseItemController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseOrderController;
-use App\Http\Controllers\Api\V1\Admin\PurchaseReturnController;
 use App\Http\Controllers\Api\V1\Admin\QuotationController;
+use App\Http\Controllers\Api\V1\Admin\RegionController;
 use App\Http\Controllers\Api\V1\Admin\ReportController;
 use App\Http\Controllers\Api\V1\Admin\RequestQuotationController;
 use App\Http\Controllers\Api\V1\Admin\RoleController;
@@ -458,6 +458,21 @@ Route::prefix('admin')->group(function (): void {
             Route::post('gateways/{group}', [GatewaySettingController::class, 'store']);
             Route::put('gateways/{group}/{itemId}', [GatewaySettingController::class, 'update']);
             Route::delete('gateways/{group}/{itemId}', [GatewaySettingController::class, 'destroy']);
+        });
+
+        // Wilayah (provinsi/kabupaten/kecamatan) — referensi alamat.
+        Route::middleware('permission:peoples.manage')->group(function (): void {
+            Route::get('provinces', [RegionController::class, 'provinces']);
+            Route::post('provinces', [RegionController::class, 'storeProvince']);
+            Route::delete('provinces/{province}', [RegionController::class, 'destroyProvince']);
+
+            Route::get('regencies', [RegionController::class, 'regencies']);
+            Route::post('regencies', [RegionController::class, 'storeRegency']);
+            Route::delete('regencies/{regency}', [RegionController::class, 'destroyRegency']);
+
+            Route::get('districts', [RegionController::class, 'districts']);
+            Route::post('districts', [RegionController::class, 'storeDistrict']);
+            Route::delete('districts/{district}', [RegionController::class, 'destroyDistrict']);
         });
 
         // Dashboard & laporan.
