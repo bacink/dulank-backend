@@ -268,4 +268,11 @@ class PayrollController extends Controller
             ])->values(),
         ];
     }
+
+    public function destroySalary(EmployeeSalary $salary): JsonResponse
+    {
+        $salary->delete();
+
+        return ApiResponse::success(['id' => (string) $salary->id, 'removed' => true]);
+    }
 }

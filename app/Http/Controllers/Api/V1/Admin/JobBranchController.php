@@ -301,4 +301,64 @@ class JobBranchController extends Controller
             ])->values(),
         ];
     }
+
+    /**
+     * Riwayat cabang job yang telah diselesaikan.
+     */
+    public function history(AdminIndexRequest $request): JsonResponse
+    {
+        $query = JobBranch::query()->where('status', 'Completed');
+
+        $customer = trim((string) $request->input('customer', ''));
+        if ($customer !== '') {
+            $query->where('customer', 'like', '%'.$customer.'%');
+        }
+
+        return ApiResponse::success($query->orderByDesc('date_finish')->limit(200)->get()->map(
+            fn (JobBranch $branch) => [
+                'id' => (string) $branch->id,
+                'date' => $branch->date?->toDateString(),
+                'branch' => $branch->branch,
+                'customer' => $branch->customer,
+                'flowName' => $branch->flow_name,
+                'dateFinish' => $branch->date_finish?->toDateString(),
+            ]
+        )->values());
+    }
+
+    /**
+     * Perbarui progres job (deskripsi/proses/pic/waktu).
+     */
+    public function updateJobProgress(Request $request, JobProgress $jobProgress): JsonResponse
+    {
+        $validated = $request->validate([
+            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'process' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'completedBy' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'time' => ['sometimes', 'nullable', 'date'],
+            'note' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'isCompleted' => ['sometimes', 'boolean'],
+        ]);
+
+        $jobProgress->forceFill([
+            'description' => array_key_exists('description', $validated) ? $validated['description'] : $jobProgress->description,
+            'process' => array_key_exists('process', $validated) ? $validated['process'] : $jobProgress->process,
+            'completed_by' => array_key_exists('completedBy', $validated) ? $validated['completedBy'] : $jobProgress->completed_by,
+            'time' => $request->date('time') ?? $jobProgress->time,
+            'note' => array_key_exists('note', $validated) ? $validated['note'] : $jobProgress->note,
+            'is_completed' => array_key_exists('isCompleted', $validated) ? (bool) $validated['isCompleted'] : $jobProgress->is_completed,
+        ])->save();
+
+        return ApiResponse::success([
+            'id' => (string) $jobProgress->id,
+            'progressCode' => $jobProgress->progress_code,
+            'product' => $jobProgress->product,
+            'description' => $jobProgress->description,
+            'process' => $jobProgress->process,
+            'completedBy' => $jobProgress->completed_by,
+            'time' => $jobProgress->time?->toIso8601String(),
+            'note' => $jobProgress->note,
+            'isCompleted' => (bool) $jobProgress->is_completed,
+        ]);
+    }
 }

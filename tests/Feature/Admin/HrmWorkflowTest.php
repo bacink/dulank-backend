@@ -238,3 +238,40 @@ it('provides workflow editor context', function () {
         ->assertOk()
         ->assertJsonStructure(['data' => ['products', 'productCategories', 'flowCategories', 'flows', 'templates']]);
 });
+
+it('serves job workflow extras: context, history, progress update, salary delete', function () {
+    $token = adminToken(adminWithPermissions('workflow.manage', 'hrm.manage'));
+
+    $this->withToken($token)->getJson('/api/v1/admin/job-order-context')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['jobOrder', 'order']])
+        ->assertJsonPath('data.jobOrder', null);
+
+    $this->withToken($token)->getJson('/api/v1/admin/job-branches/history')
+        ->assertOk()
+        ->assertJsonStructure(['data' => []]);
+
+    $progress = $this->withToken($token)->postJson('/api/v1/admin/job-progress', [
+        'product' => 'Brosur A4', 'description' => 'Mulai cetak', 'process' => 'Cetak',
+    ])->assertCreated();
+
+    $progressId = $progress->json('data.id');
+
+    $this->withToken($token)->putJson("/api/v1/admin/job-progress/{$progressId}", [
+        'description' => 'Selesai cetak', 'isCompleted' => true,
+    ])->assertOk()
+        ->assertJsonPath('data.description', 'Selesai cetak')
+        ->assertJsonPath('data.isCompleted', true);
+
+    $employee = Employee::query()->create(['employee_code' => 'EMP-9001', 'name' => 'Siti Aminah', 'status' => 'Active']);
+
+    $salary = $this->withToken($token)->postJson('/api/v1/admin/employee-salaries', [
+        'employeeId' => $employee->id, 'name' => 'Gaji Pokok', 'salary' => 5000000, 'system' => 'Monthly',
+    ])->assertCreated();
+
+    $salaryId = $salary->json('data.id');
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/employee-salaries/{$salaryId}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+});

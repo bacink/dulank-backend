@@ -328,6 +328,7 @@ Route::prefix('admin')->group(function (): void {
 
             Route::get('employee-salaries', [PayrollController::class, 'salaries']);
             Route::post('employee-salaries', [PayrollController::class, 'storeSalary']);
+            Route::delete('employee-salaries/{salary}', [PayrollController::class, 'destroySalary']);
 
             Route::get('payslips', [PayrollController::class, 'payslips']);
             Route::post('payslips/generate', [PayrollController::class, 'generatePayslip']);
@@ -361,6 +362,7 @@ Route::prefix('admin')->group(function (): void {
             Route::put('work-flows/{workFlow}', [JobOrderController::class, 'updateWorkFlow']);
             Route::delete('work-flows/{workFlow}', [JobOrderController::class, 'destroyWorkFlow']);
 
+            Route::get('job-order-context', [JobOrderController::class, 'context']);
             Route::get('job-orders', [JobOrderController::class, 'index']);
             Route::post('job-orders', [JobOrderController::class, 'store']);
             Route::get('job-orders/{jobOrder}', [JobOrderController::class, 'show']);
@@ -368,6 +370,7 @@ Route::prefix('admin')->group(function (): void {
             Route::post('job-orders/{jobOrder}/status', [JobOrderController::class, 'updateStatus']);
             Route::delete('job-orders/{jobOrder}', [JobOrderController::class, 'destroy']);
 
+            Route::get('job-branches/history', [JobBranchController::class, 'history']);
             Route::get('job-branches', [JobBranchController::class, 'index']);
             Route::post('job-branches', [JobBranchController::class, 'store']);
             Route::get('job-branches/{jobBranch}', [JobBranchController::class, 'show']);
@@ -377,6 +380,7 @@ Route::prefix('admin')->group(function (): void {
 
             Route::get('job-progress', [JobBranchController::class, 'jobProgress']);
             Route::post('job-progress', [JobBranchController::class, 'storeJobProgress']);
+            Route::put('job-progress/{jobProgress}', [JobBranchController::class, 'updateJobProgress']);
 
             Route::get('job-list', [JobViewController::class, 'jobList']);
             Route::get('my-jobs', [JobViewController::class, 'myJobs']);

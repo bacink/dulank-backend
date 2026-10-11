@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminIndexRequest;
+use App\Http\Resources\Admin\OrderResource;
 use App\Models\FlowCategory;
 use App\Models\JobOrder;
 use App\Models\Order;
@@ -339,5 +340,27 @@ class JobOrderController extends Controller
             ])->values(),
             'branchCount' => $jobOrder->branches->count(),
         ];
+    }
+
+    /**
+     * Konteks editor job order: job order & order terkait.
+     */
+    public function context(Request $request): JsonResponse
+    {
+        $jobOrderId = $request->input('id');
+        $orderId = $request->input('orderId');
+
+        $jobOrder = $jobOrderId !== null && $jobOrderId !== ''
+            ? JobOrder::query()->find((int) $jobOrderId)
+            : null;
+
+        $order = $orderId !== null && $orderId !== ''
+            ? Order::query()->where('number', $orderId)->orWhere('id', (int) $orderId)->with('items')->first()
+            : null;
+
+        return ApiResponse::success([
+            'jobOrder' => $jobOrder !== null ? $this->jobOrderPayload($jobOrder) : null,
+            'order' => $order !== null ? new OrderResource($order) : null,
+        ]);
     }
 }
