@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\CashAdvanceController;
 use App\Http\Controllers\Api\V1\Admin\CatalogMasterController;
 use App\Http\Controllers\Api\V1\Admin\ContentAssetController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController;
+use App\Http\Controllers\Api\V1\Admin\DeleteAccountController;
 use App\Http\Controllers\Api\V1\Admin\DeliveryNoteController;
 use App\Http\Controllers\Api\V1\Admin\DocumentPdfController;
 use App\Http\Controllers\Api\V1\Admin\EmployeeController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\Api\V1\Admin\ProductController;
 use App\Http\Controllers\Api\V1\Admin\PromoController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseCategoryController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseController;
+use App\Http\Controllers\Api\V1\Admin\PurchaseReturnController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseItemController;
 use App\Http\Controllers\Api\V1\Admin\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\Admin\QuotationController;
@@ -43,6 +45,7 @@ use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\SaleController;
 use App\Http\Controllers\Api\V1\Admin\SalesReturnController;
 use App\Http\Controllers\Api\V1\Admin\SettingController;
+use App\Http\Controllers\Api\V1\Admin\SubscriptionController;
 use App\Http\Controllers\Api\V1\Admin\SupplierController;
 use App\Http\Controllers\Api\V1\Admin\TaxController;
 use App\Http\Controllers\Api\V1\Admin\TaxRateController;
@@ -204,6 +207,9 @@ Route::prefix('admin')->group(function (): void {
             Route::post('user-admins', [UserManagementController::class, 'storeUserAdmin']);
             Route::put('user-admins/{userAdmin}', [UserManagementController::class, 'updateUserAdmin']);
             Route::delete('user-admins/{userAdmin}', [UserManagementController::class, 'destroyUserAdmin']);
+
+            Route::get('delete-accounts', [DeleteAccountController::class, 'index']);
+            Route::delete('delete-accounts/{deleteAccountRequest}', [DeleteAccountController::class, 'destroy']);
         });
 
         // Products & master katalog.
@@ -594,6 +600,9 @@ Route::prefix('admin')->group(function (): void {
             Route::get('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'showSupportTicket']);
             Route::put('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'updateSupportTicket']);
             Route::delete('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'destroySupportTicket']);
+
+            Route::get('subscriptions', [SubscriptionController::class, 'index']);
+            Route::put('subscriptions/{subscription}', [SubscriptionController::class, 'update']);
         });
     });
 });

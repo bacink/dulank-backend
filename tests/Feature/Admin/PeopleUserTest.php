@@ -2,6 +2,7 @@
 
 use App\Models\Customer;
 use App\Models\CustomerAccountEntry;
+use App\Models\DeleteAccountRequest;
 use App\Models\Store;
 use App\Models\Supplier;
 use App\Models\User;
@@ -211,4 +212,24 @@ it('serves region reference lists', function () {
     $this->withToken($token)->getJson('/api/v1/admin/provinces')
         ->assertOk()
         ->assertJsonStructure(['data' => []]);
+});
+
+it('manages delete account requests', function () {
+    $token = adminToken(adminWithPermissions('users.manage'));
+
+    $request = DeleteAccountRequest::query()->create([
+        'email' => 'del@test.dev', 'user_name' => 'Del User',
+        'requisition_date' => now()->toDateString(), 'status' => 'Pending',
+    ]);
+
+    $this->withToken($token)->getJson('/api/v1/admin/delete-accounts')
+        ->assertOk()
+        ->assertJsonStructure(['data' => [['id', 'email', 'userName', 'requisitionDate']]])
+        ->assertJsonPath('data.0.email', 'del@test.dev');
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/delete-accounts/{$request->id}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+
+    $this->assertDatabaseMissing('delete_account_requests', ['email' => 'del@test.dev']);
 });

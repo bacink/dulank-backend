@@ -6,6 +6,7 @@ use App\Models\Listing;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\Wishlist;
 
@@ -352,4 +353,27 @@ it('moderates a calculator partner', function () {
         ->assertJsonPath('data.status', 'Inactive');
 
     $this->assertDatabaseHas('partners', ['id' => $id, 'status' => 'Inactive']);
+});
+
+it('lists and updates subscriptions with summary', function () {
+    $token = adminToken(adminWithPermissions('orders.manage'));
+
+    $subscription = Subscription::query()->create([
+        'subscriber' => 'Budi Store', 'plan' => 'Advanced', 'plan_tier' => 'Advanced',
+        'billing_cycle' => '365 Days', 'payment_method' => 'Credit Card',
+        'amount' => 1200000, 'created_date' => now()->toDateString(),
+        'expiring_on' => now()->addYear()->toDateString(), 'status' => 'Paid',
+    ]);
+
+    $this->withToken($token)->getJson('/api/v1/admin/subscriptions')
+        ->assertOk()
+        ->assertJsonStructure(['data' => [['id', 'subscriber', 'planTier', 'billingCycle', 'amount', 'status']], 'summary' => ['totalTransactions', 'totalSubscribers', 'activeSubscribers', 'expiredSubscribers']])
+        ->assertJsonPath('summary.totalTransactions', 1)
+        ->assertJsonPath('summary.activeSubscribers', 1);
+
+    $this->withToken($token)->putJson("/api/v1/admin/subscriptions/{$subscription->id}", [
+        'status' => 'Unpaid', 'amount' => 900000,
+    ])->assertOk()
+        ->assertJsonPath('data.status', 'Unpaid')
+        ->assertJsonPath('data.amount', 900000);
 });
