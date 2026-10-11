@@ -535,6 +535,7 @@ Route::prefix('admin')->group(function (): void {
 
             Route::get('discount-plans', [PromoController::class, 'discountPlans']);
             Route::post('discount-plans', [PromoController::class, 'storeDiscountPlan']);
+            Route::put('discount-plans/{discountPlan}', [PromoController::class, 'updateDiscountPlan']);
             Route::delete('discount-plans/{discountPlan}', [PromoController::class, 'destroyDiscountPlan']);
 
             Route::get('pos/products', [PosController::class, 'products']);

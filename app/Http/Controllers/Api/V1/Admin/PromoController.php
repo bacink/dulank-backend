@@ -180,6 +180,23 @@ class PromoController extends Controller
         return ApiResponse::success(['id' => (string) $discountPlan->id, 'removed' => true]);
     }
 
+    public function updateDiscountPlan(Request $request, DiscountPlan $discountPlan): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'customers' => ['sometimes', 'nullable', 'array'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $discountPlan->forceFill([
+            'name' => $validated['name'],
+            'customers' => $validated['customers'] ?? $discountPlan->customers,
+            'status' => $validated['status'] ?? $discountPlan->status,
+        ])->save();
+
+        return ApiResponse::success($this->planPayload($discountPlan->loadCount('discounts')));
+    }
+
     public function discounts(AdminIndexRequest $request): JsonResponse
     {
         $query = Discount::query()->with('plan');

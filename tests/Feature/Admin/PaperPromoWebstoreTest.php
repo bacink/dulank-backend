@@ -276,3 +276,23 @@ it('manages calculator components, profit tiers, partners and listings moderatio
         ->assertOk()
         ->assertJsonStructure(['data' => ['telemetry' => ['currentUsers', 'totalRequest', 'totalCalculate'], 'users']]);
 });
+
+it('updates a discount plan', function () {
+    $token = adminToken(adminWithPermissions('sales.manage'));
+
+    $created = $this->withToken($token)->postJson('/api/v1/admin/discount-plans', [
+        'name' => 'Plan Smoke', 'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.name', 'Plan Smoke');
+
+    $id = $created->json('data.id');
+
+    $this->withToken($token)->putJson("/api/v1/admin/discount-plans/{$id}", [
+        'name' => 'Plan Smoke Edit', 'customers' => ['VIP'], 'status' => 'Inactive',
+    ])->assertOk()
+        ->assertJsonPath('data.name', 'Plan Smoke Edit')
+        ->assertJsonPath('data.customers', ['VIP'])
+        ->assertJsonPath('data.status', 'Inactive');
+
+    $this->assertDatabaseHas('discount_plans', ['id' => $id, 'status' => 'Inactive']);
+});
