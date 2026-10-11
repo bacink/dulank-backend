@@ -29,6 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // REST API murni: guest tidak pernah dialihkan ke halaman login web.
+        // Tanpa ini, middleware "auth" memanggil route('login') yang tidak ada
+        // dan membalas 500 "Route [login] not defined" alih-alih 401 JSON.
+        $middleware->redirectGuestsTo(null);
+
         $middleware->appendToGroup('api', BlockBannedIp::class);
 
         $middleware->alias([

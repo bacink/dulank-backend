@@ -116,3 +116,12 @@ it('blocks with a banned ip even for authenticated users', function () {
         ->getJson('/api/v1/admin/dashboard')
         ->assertStatus(403);
 });
+
+it('returns a 401 json envelope for guests without an accept header', function () {
+    // Regresi: default Laravel mengarahkan guest ke route('login') yang tidak ada
+    // sehingga request tanpa Accept: application/json dibalas 500, bukan 401.
+    $this->get('/api/v1/admin/orders')
+        ->assertUnauthorized()
+        ->assertJsonPath('success', false)
+        ->assertJsonPath('message', 'Unauthenticated.');
+});
