@@ -178,3 +178,29 @@ it('requires peoples permission for people endpoints', function () {
         ->getJson('/api/v1/admin/customers')
         ->assertStatus(403);
 });
+
+it('creates, updates and deletes customer types', function () {
+    $token = adminToken(adminWithPermissions('peoples.manage'));
+
+    $created = $this->withToken($token)->postJson('/api/v1/admin/customer-types', [
+        'name' => 'Lotere',
+        'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.name', 'Lotere');
+
+    $id = $created->json('data.id');
+
+    $this->withToken($token)->putJson("/api/v1/admin/customer-types/{$id}", [
+        'name' => 'Litografi',
+        'status' => 'Inactive',
+    ])->assertOk()
+        ->assertJsonPath('data.name', 'Litografi');
+
+    $this->assertDatabaseHas('customer_types', ['name' => 'Litografi', 'status' => 'Inactive']);
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/customer-types/{$id}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+
+    $this->assertDatabaseMissing('customer_types', ['name' => 'Litografi']);
+});

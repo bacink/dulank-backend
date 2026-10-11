@@ -249,6 +249,7 @@ Route::prefix('admin')->group(function (): void {
 
             Route::get('customer-types', [PeopleController::class, 'customerTypes']);
             Route::post('customer-types', [PeopleController::class, 'storeCustomerType']);
+            Route::put('customer-types/{customerType}', [PeopleController::class, 'updateCustomerType']);
             Route::delete('customer-types/{customerType}', [PeopleController::class, 'destroyCustomerType']);
 
             Route::get('stores', [PeopleController::class, 'stores']);

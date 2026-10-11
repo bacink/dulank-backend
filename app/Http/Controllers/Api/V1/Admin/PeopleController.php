@@ -122,6 +122,21 @@ class PeopleController extends Controller
         return ApiResponse::success(['id' => (string) $customerType->id, 'removed' => true]);
     }
 
+    public function updateCustomerType(Request $request, CustomerType $customerType): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $customerType->forceFill([
+            'name' => $validated['name'],
+            'status' => $validated['status'] ?? $customerType->status,
+        ])->save();
+
+        return ApiResponse::success(['id' => (string) $customerType->id, 'name' => $customerType->name]);
+    }
+
     public function stores(AdminIndexRequest $request): JsonResponse
     {
         $query = Store::query()->with('manager');
