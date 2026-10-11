@@ -99,6 +99,23 @@ class SettingController extends Controller
         return ApiResponse::success(['id' => (string) $customField->id, 'removed' => true]);
     }
 
+    public function updateCustomField(Request $request, CustomField $customField): JsonResponse
+    {
+        $validated = $request->validate([
+            'module' => ['sometimes', 'string', 'max:60'],
+            'label' => ['sometimes', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:60'],
+            'type' => ['sometimes', 'nullable', 'in:text,number,date,select,textarea,checkbox'],
+            'options' => ['sometimes', 'nullable', 'array'],
+            'required' => ['sometimes', 'boolean'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $customField->forceFill($validated)->save();
+
+        return ApiResponse::success(['id' => (string) $customField->id, 'label' => $customField->label]);
+    }
+
     public function banIps(AdminIndexRequest $request): JsonResponse
     {
         $query = BanIp::query();
@@ -145,6 +162,31 @@ class SettingController extends Controller
         return ApiResponse::success(['id' => (string) $banIp->id, 'removed' => true]);
     }
 
+    public function updateBanIp(Request $request, BanIp $banIp): JsonResponse
+    {
+        $validated = $request->validate([
+            'ipAddress' => ['sometimes', 'string', 'max:45'],
+            'reason' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $banIp->forceFill(array_filter([
+            'ip_address' => $validated['ipAddress'] ?? $banIp->ip_address,
+            'reason' => array_key_exists('reason', $validated) ? $validated['reason'] : $banIp->reason,
+            'status' => $validated['status'] ?? $banIp->status,
+        ], fn ($value) => $value !== null))->save();
+
+        Cache::forget('ban_ips');
+
+        return ApiResponse::success([
+            'id' => (string) $banIp->id,
+            'ip' => $banIp->ip_address,
+            'reason' => $banIp->reason,
+            'status' => $banIp->status,
+            'created' => $banIp->created_at?->toIso8601String(),
+        ]);
+    }
+
     public function languages(): JsonResponse
     {
         return ApiResponse::success(Language::query()->orderBy('name')->get()->map(fn (Language $language) => [
@@ -185,6 +227,35 @@ class SettingController extends Controller
         $language->delete();
 
         return ApiResponse::success(['id' => (string) $language->id, 'removed' => true]);
+    }
+
+    public function updateLanguage(Request $request, Language $language): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'flag' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'rtl' => ['sometimes', 'boolean'],
+            'progress' => ['sometimes', 'integer', 'min:0', 'max:100'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $language->forceFill(array_filter([
+            'name' => $validated['name'] ?? null,
+            'flag' => array_key_exists('flag', $validated) ? $validated['flag'] : null,
+            'rtl' => array_key_exists('rtl', $validated) ? (bool) $validated['rtl'] : null,
+            'progress' => $validated['progress'] ?? null,
+            'status' => $validated['status'] ?? null,
+        ], fn ($value) => $value !== null))->save();
+
+        return ApiResponse::success([
+            'id' => (string) $language->id,
+            'code' => $language->code,
+            'name' => $language->name,
+            'flag' => $language->flag,
+            'rtl' => $language->rtl,
+            'progress' => (int) $language->progress,
+            'status' => $language->status,
+        ]);
     }
 
     public function translations(Language $language): JsonResponse

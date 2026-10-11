@@ -137,6 +137,7 @@ class IncomeController extends Controller
             'name' => $category->name,
             'description' => $category->description,
             'status' => $category->status,
+            'created' => $category->created_at?->toDateString(),
         ]));
     }
 
@@ -151,5 +152,25 @@ class IncomeController extends Controller
         $category = IncomeCategory::query()->create($validated);
 
         return ApiResponse::success(['id' => (string) $category->id, 'name' => $category->name], [], 201);
+    }
+
+    public function updateCategory(Request $request, IncomeCategory $incomeCategory): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $incomeCategory->forceFill($validated)->save();
+
+        return ApiResponse::success(['id' => (string) $incomeCategory->id, 'name' => $incomeCategory->name]);
+    }
+
+    public function destroyCategory(IncomeCategory $incomeCategory): JsonResponse
+    {
+        $incomeCategory->delete();
+
+        return ApiResponse::success(['id' => (string) $incomeCategory->id, 'removed' => true]);
     }
 }

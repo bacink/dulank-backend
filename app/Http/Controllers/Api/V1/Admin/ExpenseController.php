@@ -154,7 +154,9 @@ class ExpenseController extends Controller
     {
         return ApiResponse::success(ExpenseCategory::query()->orderBy('name')->get()->map(fn (ExpenseCategory $category) => [
             'id' => (string) $category->id,
-            'name' => $category->name,
+            'categoryName' => $category->name,
+            'description' => null,
+            'date' => $category->created_at?->toDateString(),
             'status' => $category->status,
         ]));
     }
@@ -162,12 +164,39 @@ class ExpenseController extends Controller
     public function storeCategory(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'categoryName' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
         ]);
 
-        $category = ExpenseCategory::query()->create($validated);
+        $category = ExpenseCategory::query()->create([
+            'name' => $validated['categoryName'] ?? $validated['name'],
+            'status' => $validated['status'] ?? 'Active',
+        ]);
 
         return ApiResponse::success(['id' => (string) $category->id, 'name' => $category->name], [], 201);
+    }
+
+    public function updateCategory(Request $request, ExpenseCategory $expenseCategory): JsonResponse
+    {
+        $validated = $request->validate([
+            'categoryName' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
+        ]);
+
+        $expenseCategory->forceFill([
+            'name' => $validated['categoryName'] ?? $validated['name'],
+            'status' => $validated['status'] ?? $expenseCategory->status,
+        ])->save();
+
+        return ApiResponse::success(['id' => (string) $expenseCategory->id, 'name' => $expenseCategory->name]);
+    }
+
+    public function destroyCategory(ExpenseCategory $expenseCategory): JsonResponse
+    {
+        $expenseCategory->delete();
+
+        return ApiResponse::success(['id' => (string) $expenseCategory->id, 'removed' => true]);
     }
 }

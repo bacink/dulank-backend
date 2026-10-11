@@ -168,3 +168,63 @@ it('enforces content, settings and report permissions', function () {
 
     $this->withToken(adminToken(adminWithPermissions('content.manage')))->getJson('/api/v1/admin/blogs')->assertOk();
 });
+
+it('updates language status and rtl flags', function () {
+    $token = adminToken(adminWithPermissions('settings.manage'));
+
+    $created = $this->withToken($token)->postJson('/api/v1/admin/languages', [
+        'code' => 'jp', 'name' => 'Jepang', 'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.code', 'jp');
+
+    $id = $created->json('data.id');
+
+    $this->withToken($token)->putJson("/api/v1/admin/languages/{$id}", [
+        'status' => 'Inactive',
+        'rtl' => true,
+        'progress' => 40,
+    ])->assertOk()
+        ->assertJsonPath('data.status', 'Inactive')
+        ->assertJsonPath('data.rtl', true)
+        ->assertJsonPath('data.progress', 40);
+
+    $this->assertDatabaseHas('languages', ['code' => 'jp', 'status' => 'Inactive', 'rtl' => 1]);
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/languages/{$id}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+
+    $this->assertDatabaseMissing('languages', ['code' => 'jp']);
+});
+
+it('updates ban ip records and custom fields', function () {
+    $token = adminToken(adminWithPermissions('settings.manage'));
+
+    $ban = $this->withToken($token)->postJson('/api/v1/admin/ban-ips', [
+        'ipAddress' => '203.0.113.25', 'reason' => 'Spam', 'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.ipAddress', '203.0.113.25');
+
+    $banId = $ban->json('data.id');
+
+    $this->withToken($token)->putJson("/api/v1/admin/ban-ips/{$banId}", [
+        'reason' => 'Persisten', 'status' => 'Inactive',
+    ])->assertOk()
+        ->assertJsonPath('data.reason', 'Persisten')
+        ->assertJsonPath('data.status', 'Inactive');
+
+    $this->assertDatabaseHas('ban_ips', ['id' => $banId, 'status' => 'Inactive']);
+
+    $field = $this->withToken($token)->postJson('/api/v1/admin/custom-fields', [
+        'module' => 'sales', 'label' => 'Nomor PO', 'name' => 'po_number', 'type' => 'text',
+    ])->assertCreated();
+
+    $fieldId = $field->json('data.id');
+
+    $this->withToken($token)->putJson("/api/v1/admin/custom-fields/{$fieldId}", [
+        'label' => 'Nomor PO Customer', 'required' => true,
+    ])->assertOk()
+        ->assertJsonPath('data.label', 'Nomor PO Customer');
+
+    $this->assertDatabaseHas('custom_fields', ['id' => $fieldId, 'label' => 'Nomor PO Customer', 'required' => 1]);
+});

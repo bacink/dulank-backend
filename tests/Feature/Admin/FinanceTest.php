@@ -5,6 +5,8 @@ use App\Models\BankAccountType;
 use App\Models\Customer;
 use App\Models\CustomerAccountEntry;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
+use App\Models\IncomeCategory;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Purchase;
@@ -276,4 +278,52 @@ it('summarizes finance and requires the finance permission', function () {
     $this->withToken(adminToken(User::factory()->admin()->create()))
         ->getJson('/api/v1/admin/incomes')
         ->assertStatus(403);
+});
+
+it('manages income and expense categories with update and delete', function () {
+    $token = adminToken(adminWithPermissions('finance.manage'));
+
+    $this->withToken($token)->postJson('/api/v1/admin/income-categories', [
+        'name' => 'Sumbangan', 'description' => 'Donasi', 'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.name', 'Sumbangan');
+
+    $this->withToken($token)->getJson('/api/v1/admin/income-categories')
+        ->assertOk()
+        ->assertJsonStructure(['data' => [['id', 'name', 'description', 'status', 'created']]]);
+
+    $incomeCategory = IncomeCategory::query()->where('name', 'Sumbangan')->firstOrFail();
+
+    $this->withToken($token)->putJson("/api/v1/admin/income-categories/{$incomeCategory->id}", [
+        'name' => 'Sumbangan Lain', 'status' => 'Inactive',
+    ])->assertOk()
+        ->assertJsonPath('data.name', 'Sumbangan Lain');
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/income-categories/{$incomeCategory->id}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+
+    $this->assertDatabaseMissing('income_categories', ['name' => 'Sumbangan Lain']);
+
+    $this->withToken($token)->postJson('/api/v1/admin/expense-categories', [
+        'categoryName' => 'Operasional', 'status' => 'Active',
+    ])->assertCreated()
+        ->assertJsonPath('data.name', 'Operasional');
+
+    $this->withToken($token)->getJson('/api/v1/admin/expense-categories')
+        ->assertOk()
+        ->assertJsonStructure(['data' => [['id', 'categoryName', 'description', 'date', 'status']]]);
+
+    $expenseCategory = ExpenseCategory::query()->where('name', 'Operasional')->firstOrFail();
+
+    $this->withToken($token)->putJson("/api/v1/admin/expense-categories/{$expenseCategory->id}", [
+        'categoryName' => 'Operasional Lain', 'status' => 'Inactive',
+    ])->assertOk()
+        ->assertJsonPath('data.name', 'Operasional Lain');
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/expense-categories/{$expenseCategory->id}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+
+    $this->assertDatabaseMissing('expense_categories', ['name' => 'Operasional Lain']);
 });

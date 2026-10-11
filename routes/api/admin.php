@@ -147,6 +147,8 @@ Route::prefix('admin')->group(function (): void {
             // Pendapatan & pengeluaran.
             Route::get('income-categories', [IncomeController::class, 'categories']);
             Route::post('income-categories', [IncomeController::class, 'storeCategory']);
+            Route::put('income-categories/{incomeCategory}', [IncomeController::class, 'updateCategory']);
+            Route::delete('income-categories/{incomeCategory}', [IncomeController::class, 'destroyCategory']);
             Route::get('incomes', [IncomeController::class, 'index']);
             Route::post('incomes', [IncomeController::class, 'store']);
             Route::put('incomes/{income}', [IncomeController::class, 'update']);
@@ -155,6 +157,8 @@ Route::prefix('admin')->group(function (): void {
 
             Route::get('expense-categories', [ExpenseController::class, 'categories']);
             Route::post('expense-categories', [ExpenseController::class, 'storeCategory']);
+            Route::put('expense-categories/{expenseCategory}', [ExpenseController::class, 'updateCategory']);
+            Route::delete('expense-categories/{expenseCategory}', [ExpenseController::class, 'destroyCategory']);
             Route::get('expenses', [ExpenseController::class, 'index']);
             Route::post('expenses', [ExpenseController::class, 'store']);
             Route::put('expenses/{expense}', [ExpenseController::class, 'update']);
@@ -429,15 +433,18 @@ Route::prefix('admin')->group(function (): void {
 
             Route::get('custom-fields', [SettingController::class, 'customFields']);
             Route::post('custom-fields', [SettingController::class, 'storeCustomField']);
+            Route::put('custom-fields/{customField}', [SettingController::class, 'updateCustomField']);
             Route::delete('custom-fields/{customField}', [SettingController::class, 'destroyCustomField']);
 
             Route::get('ban-ips', [SettingController::class, 'banIps']);
             Route::post('ban-ips', [SettingController::class, 'storeBanIp']);
+            Route::put('ban-ips/{banIp}', [SettingController::class, 'updateBanIp']);
             Route::delete('ban-ips/{banIp}', [SettingController::class, 'destroyBanIp']);
 
             Route::get('languages', [SettingController::class, 'languages']);
             Route::post('languages', [SettingController::class, 'storeLanguage']);
             Route::delete('languages/{language}', [SettingController::class, 'destroyLanguage']);
+            Route::put('languages/{language}', [SettingController::class, 'updateLanguage']);
             Route::get('languages/{language}/translations', [SettingController::class, 'translations']);
             Route::put('languages/{language}/translations', [SettingController::class, 'updateTranslations']);
 
