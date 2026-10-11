@@ -17,6 +17,7 @@ class RoleController extends Controller
     public function index(): JsonResponse
     {
         $roles = Role::query()
+            ->with(['permissions'])
             ->withCount('permissions')
             ->orderBy('name')
             ->get()
@@ -26,6 +27,7 @@ class RoleController extends Controller
                 'createdOn' => $role->created_at?->toDateString(),
                 'description' => $role->description,
                 'permissionsCount' => $role->permissions_count,
+                'permissions' => $role->permissions->pluck('name')->values(),
             ]);
 
         return ApiResponse::success($roles);
