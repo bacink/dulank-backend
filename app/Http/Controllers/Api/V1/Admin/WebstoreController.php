@@ -8,7 +8,9 @@ use App\Models\CartItem;
 use App\Models\ContactMessage;
 use App\Models\Order;
 use App\Models\Review;
+use App\Models\SupportTicket;
 use App\Models\Wishlist;
+use App\Support\DocumentNumber;
 use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -249,6 +251,132 @@ class WebstoreController extends Controller
             'title' => $review->title,
             'review' => $review->review,
             'status' => $review->status,
+        ];
+    }
+
+    public function supportTickets(AdminIndexRequest $request): JsonResponse
+    {
+        $query = SupportTicket::query()->with('assignee');
+
+        $status = trim((string) $request->input('status', ''));
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        $priority = trim((string) $request->input('priority', ''));
+        if ($priority !== '') {
+            $query->where('priority', $priority);
+        }
+
+        $search = trim((string) $request->input('search', ''));
+        if ($search !== '') {
+            $term = '%'.$search.'%';
+            $query->where(function (Builder $query) use ($term): void {
+                $query->where('ticket_no', 'like', $term)
+                    ->orWhere('subject', 'like', $term)
+                    ->orWhere('requested_by', 'like', $term)
+                    ->orWhere('customer_email', 'like', $term);
+            });
+        }
+
+        $limit = $request->limit();
+        $page = $request->page();
+        $total = (clone $query)->count();
+        $tickets = $query->orderByDesc('id')->forPage($page, $limit)->get();
+
+        return ApiResponse::success($tickets->map(fn (SupportTicket $ticket) => $this->ticketPayload($ticket))->values(), [
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+        ]);
+    }
+
+    public function supportTicketStats(): JsonResponse
+    {
+        return ApiResponse::success([
+            'totalTickets' => SupportTicket::query()->count(),
+            'totalPendingTickets' => SupportTicket::query()->where('status', 'Pending')->count(),
+            'totalClosedTickets' => SupportTicket::query()->where('status', 'Closed')->count(),
+            'totalDeleteTickets' => 0,
+        ]);
+    }
+
+    public function showSupportTicket(SupportTicket $supportTicket): JsonResponse
+    {
+        return ApiResponse::success($this->ticketPayload($supportTicket->load('assignee')));
+    }
+
+    public function storeSupportTicket(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'subject' => ['required', 'string', 'max:255'],
+            'requestedBy' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'customerEmail' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'customerPhone' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'type' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'priority' => ['sometimes', 'nullable', 'in:High,Medium,Low'],
+            'status' => ['sometimes', 'nullable', 'in:Open,Pending,Closed'],
+        ]);
+
+        $ticket = SupportTicket::query()->create([
+            'ticket_no' => DocumentNumber::next('support_ticket', SupportTicket::query(), 'ticket_no', 5),
+            'user_id' => $request->user()->id,
+            'requested_by' => $validated['requestedBy'] ?? $request->user()->name,
+            'customer_email' => $validated['customerEmail'] ?? null,
+            'customer_phone' => $validated['customerPhone'] ?? null,
+            'subject' => $validated['subject'],
+            'type' => $validated['type'] ?? null,
+            'priority' => $validated['priority'] ?? 'Medium',
+            'status' => $validated['status'] ?? 'Open',
+        ]);
+
+        return ApiResponse::success($this->ticketPayload($ticket), [], 201);
+    }
+
+    public function updateSupportTicket(Request $request, SupportTicket $supportTicket): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['sometimes', 'nullable', 'in:Open,Pending,Closed'],
+            'priority' => ['sometimes', 'nullable', 'in:High,Medium,Low'],
+            'assigneeId' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
+            'type' => ['sometimes', 'nullable', 'string', 'max:60'],
+        ]);
+
+        $supportTicket->forceFill([
+            'status' => $validated['status'] ?? $supportTicket->status,
+            'priority' => $validated['priority'] ?? $supportTicket->priority,
+            'assignee_id' => $validated['assigneeId'] ?? $supportTicket->assignee_id,
+            'type' => $validated['type'] ?? $supportTicket->type,
+        ])->save();
+
+        return ApiResponse::success($this->ticketPayload($supportTicket->refresh()->load('assignee')));
+    }
+
+    public function destroySupportTicket(SupportTicket $supportTicket): JsonResponse
+    {
+        $supportTicket->delete();
+
+        return ApiResponse::success(['id' => (string) $supportTicket->id, 'removed' => true]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function ticketPayload(SupportTicket $ticket): array
+    {
+        return [
+            'id' => (string) $ticket->id,
+            'ticketNo' => $ticket->ticket_no,
+            'requestedBy' => $ticket->requested_by,
+            'customerEmail' => $ticket->customer_email,
+            'customerPhone' => $ticket->customer_phone,
+            'subject' => $ticket->subject,
+            'type' => $ticket->type,
+            'priority' => $ticket->priority?->value,
+            'status' => $ticket->status?->value,
+            'assignee' => $ticket->assignee?->name,
+            'createdDate' => $ticket->created_date?->toDateString(),
+            'dueDate' => $ticket->due_date?->toDateString(),
         ];
     }
 }

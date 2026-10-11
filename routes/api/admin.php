@@ -565,6 +565,13 @@ Route::prefix('admin')->group(function (): void {
             Route::get('webstore/contact-forms', [WebstoreController::class, 'contactForms']);
             Route::put('webstore/contact-forms/{contactMessage}', [WebstoreController::class, 'updateContactForm']);
             Route::delete('webstore/contact-forms/{contactMessage}', [WebstoreController::class, 'destroyContactForm']);
+
+            Route::get('webstore/support-tickets/stats', [WebstoreController::class, 'supportTicketStats']);
+            Route::get('webstore/support-tickets', [WebstoreController::class, 'supportTickets']);
+            Route::post('webstore/support-tickets', [WebstoreController::class, 'storeSupportTicket']);
+            Route::get('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'showSupportTicket']);
+            Route::put('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'updateSupportTicket']);
+            Route::delete('webstore/support-tickets/{supportTicket}', [WebstoreController::class, 'destroySupportTicket']);
         });
     });
 });

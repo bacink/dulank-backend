@@ -296,3 +296,42 @@ it('updates a discount plan', function () {
 
     $this->assertDatabaseHas('discount_plans', ['id' => $id, 'status' => 'Inactive']);
 });
+
+it('manages support tickets end to end', function () {
+    $token = adminToken(adminWithPermissions('orders.manage'));
+
+    $created = $this->withToken($token)->postJson('/api/v1/admin/webstore/support-tickets', [
+        'subject' => 'Kertas sobek', 'requestedBy' => 'Budi', 'customerEmail' => 'budi@test.dev',
+        'priority' => 'High',
+    ])->assertCreated()
+        ->assertJsonPath('data.subject', 'Kertas sobek')
+        ->assertJsonPath('data.priority', 'High')
+        ->assertJsonPath('data.status', 'Open');
+
+    $id = $created->json('data.id');
+
+    $this->withToken($token)->getJson('/api/v1/admin/webstore/support-tickets?search=Kertas')
+        ->assertOk()
+        ->assertJsonPath('meta.total', 1)
+        ->assertJsonStructure(['data' => [['id', 'ticketNo', 'subject', 'priority', 'status', 'assignee']]]);
+
+    $this->withToken($token)->getJson('/api/v1/admin/webstore/support-tickets/stats')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['totalTickets', 'totalPendingTickets', 'totalClosedTickets']]);
+
+    $this->withToken($token)->putJson("/api/v1/admin/webstore/support-tickets/{$id}", [
+        'status' => 'Closed', 'priority' => 'Low',
+    ])->assertOk()
+        ->assertJsonPath('data.status', 'Closed')
+        ->assertJsonPath('data.priority', 'Low');
+
+    $this->withToken($token)->getJson("/api/v1/admin/webstore/support-tickets/{$id}")
+        ->assertOk()
+        ->assertJsonPath('data.status', 'Closed');
+
+    $this->withToken($token)->deleteJson("/api/v1/admin/webstore/support-tickets/{$id}")
+        ->assertOk()
+        ->assertJsonPath('data.removed', true);
+
+    $this->assertDatabaseMissing('support_tickets', ['id' => $id]);
+});
