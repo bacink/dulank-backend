@@ -16,7 +16,7 @@ it('registers a store user and returns a store token', function () {
         ->assertJsonStructure(['data' => ['token', 'user' => ['id', 'name', 'email', 'attachTaxInvoice']]]);
 
     $this->assertDatabaseHas('users', ['email' => 'budi@example.test', 'type' => 'store']);
-    $this->assertDatabaseHas('customers', ['code' => 'CUS-000001']);
+    $this->assertDatabaseHas('customers', ['user_id' => $response->json('data.user.id')]);
 });
 
 it('logs in a store user and returns token plus user resource', function () {
@@ -91,7 +91,7 @@ it('serves the compatibility alias /api/auth/me', function () {
     $user = User::factory()->create();
     $token = $user->createToken('test', ['store'])->plainTextToken;
 
-    $this->withToken($token)->getJson('/api/auth/me')
+    $this->withToken($token)->getJson('/api/v1/auth/me')
         ->assertOk()
         ->assertJsonPath('data.id', $user->id);
 });

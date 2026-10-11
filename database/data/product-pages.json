@@ -1,0 +1,1117 @@
+{
+    "cetak-buku": {
+        "slug": "cetak-buku",
+        "guide": {
+            "faqs": [
+                {
+                    "answer": "Bisa, silakan konsultasikan dengan tim kami.",
+                    "question": "Apakah bisa request ukuran khusus?"
+                },
+                {
+                    "answer": "Estimasi sesuai tabel dan variasi pesanan.",
+                    "question": "Berapa lama proses pengerjaan?"
+                }
+            ],
+            "files": [
+                "Buku A4 Portrait",
+                "Buku A5 Portrait",
+                "Buku B5 Landscape",
+                "Buku Tulis Custom"
+            ]
+        },
+        "specs": [
+            {
+                "id": "orientation",
+                "name": "cetak-buku-orientation",
+                "label": "Orientasi",
+                "options": [
+                    {
+                        "label": "Portrait (Berdiri)",
+                        "price": null,
+                        "value": "Portrait (Berdiri)",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Landscape (Tidur)",
+                        "price": null,
+                        "value": "Landscape (Tidur)",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "size",
+                "name": "cetak-buku-size",
+                "label": "Ukuran",
+                "options": [
+                    {
+                        "label": "A4 (210x297mm)",
+                        "price": 50000,
+                        "value": "A4 (210x297mm)",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "A5 (148x210mm)",
+                        "price": 35000,
+                        "value": "A5 (148x210mm)",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "B4 (250x353mm)",
+                        "price": 90000,
+                        "value": "B4 (250x353mm)",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "B5 (250x176mm)",
+                        "price": 90000,
+                        "value": "B5 (250x176mm)",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "binding",
+                "name": "cetak-buku-binding",
+                "label": "Binding/Jilid",
+                "options": [
+                    {
+                        "label": "Lem Panas",
+                        "price": null,
+                        "value": "Lem Panas",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Spiral",
+                        "price": null,
+                        "value": "Spiral",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Steples",
+                        "price": null,
+                        "value": "Steples",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Perfect Binding",
+                        "price": null,
+                        "value": "Perfect Binding",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "type",
+                "name": "cetak-buku-type",
+                "label": "Jenis Kertas Isi Buku",
+                "options": [
+                    {
+                        "label": "HVS 70gr",
+                        "price": 12000,
+                        "value": "HVS 70gr",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Bookpaper 70gr",
+                        "price": 8000,
+                        "value": "Bookpaper 70gr",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Art Paper 100gr",
+                        "price": 5000,
+                        "value": "Art Paper 100gr",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "HVS 80gr",
+                        "price": 5000,
+                        "value": "HVS 80gr",
+                        "hidden": true,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "lamination",
+                "name": "cetak-buku-lamination",
+                "label": "Laminasi Cover",
+                "options": [
+                    {
+                        "label": "Tanpa Laminasi",
+                        "price": 0,
+                        "value": "Tanpa Laminasi",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Glossy",
+                        "price": 8000,
+                        "value": "Glossy",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Doff",
+                        "price": 8000,
+                        "value": "Doff",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "UV Vernish",
+                        "price": 8000,
+                        "value": "UV Vernish",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Spot UV",
+                        "price": 8000,
+                        "value": "Spot UV",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "side",
+                "name": "cetak-buku-side",
+                "label": "Tipe Cetak",
+                "options": [
+                    {
+                        "label": "1 Warna",
+                        "price": null,
+                        "value": "1 Warna",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Full Color",
+                        "price": null,
+                        "value": "Full Color",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "1 Warna & Full Color",
+                        "price": null,
+                        "value": "1 Warna & Full Color",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "cover",
+                "name": "cetak-buku-cover",
+                "label": "Jenis Cover",
+                "options": [
+                    {
+                        "label": "Softcover",
+                        "price": 3000,
+                        "value": "Softcover",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "HardCover",
+                        "price": 5000,
+                        "value": "HardCover",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "position",
+                "name": "cetak-buku-position",
+                "label": "Finishing Cover",
+                "options": [
+                    {
+                        "label": "Glossy",
+                        "price": 3000,
+                        "value": "Glossy",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Doff",
+                        "price": 5000,
+                        "value": "Doff",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Spot UV",
+                        "price": 5000,
+                        "value": "Spot UV",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            }
+        ],
+        "title": "Cetak Buku",
+        "gallery": {
+            "items": [
+                {
+                    "name": "Buku Paket",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Buku Bacaan",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Modul Belajar",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Buku Tulis",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Notebook Custom",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Agenda",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Buku Resep",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-kuliner"
+                },
+                {
+                    "name": "Buku Nota",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-laundry"
+                },
+                {
+                    "name": "Modul Kursus",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-kursus"
+                },
+                {
+                    "name": "Katalog Sparepart",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-otomotif"
+                }
+            ],
+            "categories": [
+                {
+                    "id": "kat-all",
+                    "label": "Semua"
+                },
+                {
+                    "id": "kat-kuliner",
+                    "label": "Kuliner"
+                },
+                {
+                    "id": "kat-laundry",
+                    "label": "Laundry"
+                },
+                {
+                    "id": "kat-kursus",
+                    "label": "Kursus"
+                },
+                {
+                    "id": "kat-otomotif",
+                    "label": "Otomotif"
+                }
+            ]
+        },
+        "priceList": {
+            "rows": [
+                {
+                    "qty": "10",
+                    "unit": "Rim",
+                    "price": "65.000",
+                    "weight": "30 Kg",
+                    "discount": null,
+                    "leadTime": "3 Hari",
+                    "subTotal": "650.000"
+                },
+                {
+                    "qty": "13",
+                    "unit": "Rim",
+                    "price": "64.000",
+                    "weight": "38 Kg",
+                    "discount": "Hemat Rp130.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "832.000"
+                },
+                {
+                    "qty": "17",
+                    "unit": "Rim",
+                    "price": "64.000",
+                    "weight": "42 Kg",
+                    "discount": "Hemat Rp170.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "1.088.000"
+                },
+                {
+                    "qty": "20",
+                    "unit": "Rim",
+                    "price": "62.000",
+                    "weight": "49 Kg",
+                    "discount": "Hemat Rp600.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "1.240.000"
+                },
+                {
+                    "qty": "25",
+                    "unit": "Rim",
+                    "price": "60.000",
+                    "weight": "55 Kg",
+                    "discount": "Hemat Rp1.250.000",
+                    "leadTime": "4 Hari",
+                    "subTotal": "1.500.000"
+                }
+            ],
+            "title": "List Harga Cetak Buku"
+        }
+    },
+    "cetak-full-color": {
+        "slug": "cetak-full-color",
+        "guide": {
+            "faqs": [
+                {
+                    "answer": "Bisa, silakan konsultasikan dengan tim kami.",
+                    "question": "Apakah bisa request ukuran khusus?"
+                },
+                {
+                    "answer": "Estimasi sesuai tabel dan variasi pesanan.",
+                    "question": "Berapa lama proses pengerjaan?"
+                }
+            ],
+            "files": [
+                "Brosur Ukuran A4 (210x297mm)",
+                "Brosur Ukuran A4 (210x297mm)",
+                "Brosur Ukuran A4 (210x297mm)",
+                "Brosur Ukuran A4 (210x297mm)"
+            ]
+        },
+        "specs": [
+            {
+                "id": "size",
+                "name": "cetak-full-color-size",
+                "label": "Ukuran Brosur",
+                "options": [
+                    {
+                        "label": "A4 (210x297mm)",
+                        "price": 50000,
+                        "value": "A4 (210x297mm)",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "A5 (148x210mm)",
+                        "price": 35000,
+                        "value": "A5 (148x210mm)",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "A3 (297x420mm)",
+                        "price": 90000,
+                        "value": "A3 (297x420mm)",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "type",
+                "name": "cetak-full-color-type",
+                "label": "Jenis Bahan Kertas",
+                "options": [
+                    {
+                        "label": "Art paper 150gr",
+                        "price": 12000,
+                        "value": "Art paper 150gr",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Art paper 120gr",
+                        "price": 8000,
+                        "value": "Art paper 120gr",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "HVS 100gr",
+                        "price": 5000,
+                        "value": "HVS 100gr",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "lamination",
+                "name": "cetak-full-color-lamination",
+                "label": "Laminasi",
+                "options": [
+                    {
+                        "label": "Tanpa Laminasi",
+                        "price": 0,
+                        "value": "Tanpa Laminasi",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Laminasi Doff",
+                        "price": 8000,
+                        "value": "Laminasi Doff",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Laminasi Glossy",
+                        "price": 8000,
+                        "value": "Laminasi Glossy",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Laminasi Doff + Spot UV",
+                        "price": 8000,
+                        "value": "Laminasi Doff + Spot UV",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "side",
+                "name": "cetak-full-color-side",
+                "label": "Sisi Cetak",
+                "options": [
+                    {
+                        "label": "Cetak 1 Sisi",
+                        "price": null,
+                        "value": "Cetak 1 Sisi",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Cetak Bolak Balik",
+                        "price": null,
+                        "value": "Cetak Bolak Balik",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "fold",
+                "name": "cetak-full-color-fold",
+                "label": "Lipatan",
+                "options": [
+                    {
+                        "label": "Tanpa Lipatan",
+                        "price": 3000,
+                        "value": "Tanpa Lipatan",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "1 Lipatan",
+                        "price": 5000,
+                        "value": "1 Lipatan",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "2 Lipatan",
+                        "price": 5000,
+                        "value": "2 Lipatan",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            }
+        ],
+        "title": "Cetak Full Color",
+        "gallery": {
+            "items": [
+                {
+                    "name": "Rumah Makan",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Motor Honda",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Cuci Baju",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Les Bahasa",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Salon",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Mobil Toyota",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Rumah Makan",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-kuliner"
+                },
+                {
+                    "name": "Cuci Baju",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-laundry"
+                },
+                {
+                    "name": "Les Bahasa",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-kursus"
+                },
+                {
+                    "name": "Mobil Toyota",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-otomotif"
+                }
+            ],
+            "categories": [
+                {
+                    "id": "kat-all",
+                    "label": "Semua"
+                },
+                {
+                    "id": "kat-kuliner",
+                    "label": "Kuliner"
+                },
+                {
+                    "id": "kat-laundry",
+                    "label": "Laundry"
+                },
+                {
+                    "id": "kat-kursus",
+                    "label": "Kursus"
+                },
+                {
+                    "id": "kat-otomotif",
+                    "label": "Otomotif"
+                }
+            ]
+        },
+        "priceList": {
+            "rows": [
+                {
+                    "qty": "10",
+                    "unit": "Rim",
+                    "price": "65.000",
+                    "weight": "30 Kg",
+                    "discount": null,
+                    "leadTime": "3 Hari",
+                    "subTotal": "650.000"
+                },
+                {
+                    "qty": "13",
+                    "unit": "Rim",
+                    "price": "64.000",
+                    "weight": "38 Kg",
+                    "discount": "Hemat Rp130.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "832.000"
+                },
+                {
+                    "qty": "17",
+                    "unit": "Rim",
+                    "price": "64.000",
+                    "weight": "42 Kg",
+                    "discount": "Hemat Rp170.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "1.088.000"
+                },
+                {
+                    "qty": "20",
+                    "unit": "Rim",
+                    "price": "62.000",
+                    "weight": "49 Kg",
+                    "discount": "Hemat Rp600.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "1.240.000"
+                },
+                {
+                    "qty": "25",
+                    "unit": "Rim",
+                    "price": "60.000",
+                    "weight": "55 Kg",
+                    "discount": "Hemat Rp1.250.000",
+                    "leadTime": "4 Hari",
+                    "subTotal": "1.500.000"
+                }
+            ],
+            "title": "List Harga Cetak Brosur Full Color"
+        }
+    },
+    "kalender": {
+        "slug": "kalender",
+        "guide": {
+            "faqs": [
+                {
+                    "answer": "Bisa, silakan konsultasikan dengan tim kami.",
+                    "question": "Apakah bisa request ukuran khusus?"
+                },
+                {
+                    "answer": "Estimasi sesuai tabel dan variasi pesanan.",
+                    "question": "Berapa lama proses pengerjaan?"
+                }
+            ],
+            "files": [
+                "Kalender Dinding 31x43",
+                "Kalender Dinding 35x50",
+                "Kalender Meja 15x21cm",
+                "Kalender Bolak Balik Sprial Tengah"
+            ]
+        },
+        "specs": [
+            {
+                "id": "content",
+                "name": "kalender-content",
+                "label": "Jumlah Isi",
+                "options": [
+                    {
+                        "label": "1 Lembar",
+                        "price": null,
+                        "value": "1 Lembar",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "2 Lembar",
+                        "price": null,
+                        "value": "2 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "3 Lembar",
+                        "price": null,
+                        "value": "3 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "4 Lembar",
+                        "price": null,
+                        "value": "4 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "6 Lembar",
+                        "price": null,
+                        "value": "6 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "7 Lembar",
+                        "price": null,
+                        "value": "7 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "12 Lembar",
+                        "price": null,
+                        "value": "12 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "13 Lembar",
+                        "price": null,
+                        "value": "13 Lembar",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "size",
+                "name": "kalender-size",
+                "label": "Ukuran Kalender",
+                "options": [
+                    {
+                        "label": "Kecil 31x43",
+                        "price": 50000,
+                        "value": "Kecil 31x43",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Kecil 31x48",
+                        "price": 35000,
+                        "value": "Kecil 31x48",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Sedang 35x50",
+                        "price": 90000,
+                        "value": "Sedang 35x50",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Sedang 38x54",
+                        "price": 90000,
+                        "value": "Sedang 38x54",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Besar 43x64",
+                        "price": 90000,
+                        "value": "Besar 43x64",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "hanger",
+                "name": "kalender-hanger",
+                "label": "Hanger/Gantungan",
+                "options": [
+                    {
+                        "label": "Spiral",
+                        "price": null,
+                        "value": "Spiral",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Jepit Kaleng",
+                        "price": null,
+                        "value": "Jepit Kaleng",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Mata Ayam",
+                        "price": null,
+                        "value": "Mata Ayam",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "type",
+                "name": "kalender-type",
+                "label": "Jenis Bahan",
+                "options": [
+                    {
+                        "label": "Art Paper",
+                        "price": 12000,
+                        "value": "Art Paper",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Art Carton",
+                        "price": 8000,
+                        "value": "Art Carton",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Karton BW",
+                        "price": 5000,
+                        "value": "Karton BW",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Karton Duplex",
+                        "price": 5000,
+                        "value": "Karton Duplex",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "lamination",
+                "name": "kalender-lamination",
+                "label": "Laminasi",
+                "options": [
+                    {
+                        "label": "Tanpa Laminasi",
+                        "price": 0,
+                        "value": "Tanpa Laminasi",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Glossy",
+                        "price": 8000,
+                        "value": "Glossy",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Doff",
+                        "price": 8000,
+                        "value": "Doff",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "UV Vernish",
+                        "price": 8000,
+                        "value": "UV Vernish",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Spot UV",
+                        "price": 8000,
+                        "value": "Spot UV",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "side",
+                "name": "kalender-side",
+                "label": "Jenis Cetak",
+                "options": [
+                    {
+                        "label": "Cetak Full Color",
+                        "price": null,
+                        "value": "Cetak Full Color",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Cetak 2 Warna",
+                        "price": null,
+                        "value": "Cetak 2 Warna",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "cover",
+                "name": "kalender-cover",
+                "label": "Cover Amplop",
+                "options": [
+                    {
+                        "label": "Tanpa Cover Amplop",
+                        "price": 3000,
+                        "value": "Tanpa Cover Amplop",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Pakai Amplop Kertas",
+                        "price": 5000,
+                        "value": "Pakai Amplop Kertas",
+                        "hidden": false,
+                        "selected": false
+                    },
+                    {
+                        "label": "Pakai Amplop Plastik",
+                        "price": 5000,
+                        "value": "Pakai Amplop Plastik",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            },
+            {
+                "id": "position",
+                "name": "kalender-position",
+                "label": "Posisi",
+                "options": [
+                    {
+                        "label": "Landscape (Tidur)",
+                        "price": 3000,
+                        "value": "Landscape (Tidur)",
+                        "hidden": false,
+                        "selected": true
+                    },
+                    {
+                        "label": "Portrait (Berdiri)",
+                        "price": 5000,
+                        "value": "Portrait (Berdiri)",
+                        "hidden": false,
+                        "selected": false
+                    }
+                ]
+            }
+        ],
+        "title": "Kalender",
+        "gallery": {
+            "items": [
+                {
+                    "name": "Kalender Dinding",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Kalender Meja",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Kalender Spiral",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Corporate",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Promosi",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Minimalis",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-all"
+                },
+                {
+                    "name": "Kalender Kuliner",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-kuliner"
+                },
+                {
+                    "name": "Cuci Baju",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-laundry"
+                },
+                {
+                    "name": "Les Bahasa",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-kursus"
+                },
+                {
+                    "name": "Mobil Toyota",
+                    "image": "/storage/images/gallery/dummy-post-square-1-1.jpg",
+                    "category": "kat-otomotif"
+                }
+            ],
+            "categories": [
+                {
+                    "id": "kat-all",
+                    "label": "Semua"
+                },
+                {
+                    "id": "kat-kuliner",
+                    "label": "Kuliner"
+                },
+                {
+                    "id": "kat-laundry",
+                    "label": "Laundry"
+                },
+                {
+                    "id": "kat-kursus",
+                    "label": "Kursus"
+                },
+                {
+                    "id": "kat-otomotif",
+                    "label": "Otomotif"
+                }
+            ]
+        },
+        "priceList": {
+            "rows": [
+                {
+                    "qty": "10",
+                    "unit": "Rim",
+                    "price": "65.000",
+                    "weight": "30 Kg",
+                    "discount": null,
+                    "leadTime": "3 Hari",
+                    "subTotal": "650.000"
+                },
+                {
+                    "qty": "13",
+                    "unit": "Rim",
+                    "price": "64.000",
+                    "weight": "38 Kg",
+                    "discount": "Hemat Rp130.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "832.000"
+                },
+                {
+                    "qty": "17",
+                    "unit": "Rim",
+                    "price": "64.000",
+                    "weight": "42 Kg",
+                    "discount": "Hemat Rp170.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "1.088.000"
+                },
+                {
+                    "qty": "20",
+                    "unit": "Rim",
+                    "price": "62.000",
+                    "weight": "49 Kg",
+                    "discount": "Hemat Rp600.000",
+                    "leadTime": "3 Hari",
+                    "subTotal": "1.240.000"
+                },
+                {
+                    "qty": "25",
+                    "unit": "Rim",
+                    "price": "60.000",
+                    "weight": "55 Kg",
+                    "discount": "Hemat Rp1.250.000",
+                    "leadTime": "4 Hari",
+                    "subTotal": "1.500.000"
+                }
+            ],
+            "title": "List Harga Kalender 2027"
+        }
+    }
+}

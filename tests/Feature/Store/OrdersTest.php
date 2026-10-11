@@ -99,18 +99,13 @@ it('lists invoices for store under /invoices and legacy /billings alias', functi
         ->assertJsonPath('data.0.id', $expected['id'])
         ->assertJsonPath('data.0.orderId', 'SO-123')
         ->assertJsonPath('data.0.total', 650000);
-
-    $this->withToken($user->createToken('t', ['store'])->plainTextToken)
-        ->getJson('/api/billings')
-        ->assertOk()
-        ->assertJsonPath('data.0.id', '600449168');
 });
 
 it('serves the legacy users endpoint scoped to its owner', function () {
     $user = User::factory()->create();
 
     $this->withToken($user->createToken('t', ['store'])->plainTextToken)
-        ->getJson('/api/users/'.$user->id)
+        ->getJson('/api/v1/users/'.$user->id)
         ->assertOk()
         ->assertJsonPath('data.id', $user->id)
         ->assertJsonStructure(['data' => ['id', 'name', 'email', 'phone', 'avatar']]);

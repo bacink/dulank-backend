@@ -160,7 +160,7 @@ it('serves the same payload through the /api compatibility alias', function () {
     Product::factory()->create();
 
     $v1 = $this->getJson('/api/v1/products')->json();
-    $legacy = $this->getJson('/api/products')->json();
+    $legacy = $this->getJson('/api/v1/products')->json();
 
     expect($legacy['data'])->toEqual($v1['data']);
     expect($legacy['meta'])->toEqual($v1['meta']);

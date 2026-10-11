@@ -3,10 +3,16 @@
 use App\Http\Controllers\Api\V1\Store\AddressController;
 use App\Http\Controllers\Api\V1\Store\AuthController;
 use App\Http\Controllers\Api\V1\Store\BlogPostController;
+use App\Http\Controllers\Api\V1\Store\CalculatorMachineController;
+use App\Http\Controllers\Api\V1\Store\CalculatorPaperGroupController;
+use App\Http\Controllers\Api\V1\Store\CalculatorPaperPriceController;
 use App\Http\Controllers\Api\V1\Store\CartController;
 use App\Http\Controllers\Api\V1\Store\CatalogController;
 use App\Http\Controllers\Api\V1\Store\CategoryController;
 use App\Http\Controllers\Api\V1\Store\FaqController;
+use App\Http\Controllers\Api\V1\Store\PartnerController;
+use App\Http\Controllers\Api\V1\Store\ProductPageController;
+use App\Http\Controllers\Api\V1\Store\SettingController;
 use App\Http\Controllers\Api\V1\Store\InvoiceController;
 use App\Http\Controllers\Api\V1\Store\OrderController;
 use App\Http\Controllers\Api\V1\Store\PaymentController;
@@ -29,6 +35,9 @@ Route::middleware('throttle:api')->group(function (): void {
     Route::get('products/{slug}', [ProductController::class, 'show']);
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('catalog/{kind}', [CatalogController::class, 'show']);
+    Route::get('merchants/{id}', [PartnerController::class, 'show']);
+    Route::get('product-pages/{slug}', [ProductPageController::class, 'show']);
+    Route::get('settings/{group}', [SettingController::class, 'show']);
     Route::get('blog', [BlogPostController::class, 'index']);
     Route::get('blog/{slug}', [BlogPostController::class, 'show']);
     Route::get('faqs', [FaqController::class, 'index']);
@@ -90,6 +99,22 @@ Route::middleware('throttle:api')->group(function (): void {
 
             Route::get('users/{id}', [UserController::class, 'show']);
             Route::get('users/{id}/addresses', [UserController::class, 'addresses']);
+
+            // CRUD kalkulator milik partner (storefront-side, bukan admin).
+            Route::get('calculator/machines', [CalculatorMachineController::class, 'index']);
+            Route::post('calculator/machines', [CalculatorMachineController::class, 'store']);
+            Route::put('calculator/machines/{id}', [CalculatorMachineController::class, 'update']);
+            Route::delete('calculator/machines/{id}', [CalculatorMachineController::class, 'destroy']);
+
+            Route::get('calculator/paper-groups', [CalculatorPaperGroupController::class, 'index']);
+            Route::post('calculator/paper-groups', [CalculatorPaperGroupController::class, 'store']);
+            Route::put('calculator/paper-groups/{id}', [CalculatorPaperGroupController::class, 'update']);
+            Route::delete('calculator/paper-groups/{id}', [CalculatorPaperGroupController::class, 'destroy']);
+
+            Route::get('calculator/paper-prices', [CalculatorPaperPriceController::class, 'index']);
+            Route::post('calculator/paper-prices', [CalculatorPaperPriceController::class, 'store']);
+            Route::put('calculator/paper-prices/{id}', [CalculatorPaperPriceController::class, 'update']);
+            Route::delete('calculator/paper-prices/{id}', [CalculatorPaperPriceController::class, 'destroy']);
         });
     });
 });
