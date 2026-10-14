@@ -34,11 +34,29 @@ final class LedgerService
         ]);
     }
 
+    /**
+     * Total mutasi masuk (credit) dan keluar (debit) sebuah akun.
+     *
+     * @return array{credit: int, debit: int}
+     */
+    public function totals(BankAccount $account): array
+    {
+        return [
+            'credit' => (int) $account->ledgerEntries()->where('direction', 'credit')->sum('amount'),
+            'debit' => (int) $account->ledgerEntries()->where('direction', 'debit')->sum('amount'),
+        ];
+    }
+
     public function balance(BankAccount $account): int
     {
-        $credit = (int) $account->ledgerEntries()->where('direction', 'credit')->sum('amount');
-        $debit = (int) $account->ledgerEntries()->where('direction', 'debit')->sum('amount');
+        return $this->balanceFrom((int) $account->opening_balance, $this->totals($account));
+    }
 
-        return (int) $account->opening_balance + $credit - $debit;
+    /**
+     * @param  array{credit: int, debit: int}  $totals
+     */
+    public function balanceFrom(int $openingBalance, array $totals): int
+    {
+        return $openingBalance + $totals['credit'] - $totals['debit'];
     }
 }
