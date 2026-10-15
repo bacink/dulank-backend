@@ -1,17 +1,13 @@
-
 <?php
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
-header('Content-Type: application/json');
 ini_set('display_errors', '0');
 
-$step = 'start';
+$step = 'prepare';
 
 try {
-    $step = 'prepare_cache';
-
     $cachePath = '/tmp/laravel-cache';
 
     if (!is_dir($cachePath)) {
@@ -27,35 +23,40 @@ try {
         'APP_ROUTES_CACHE' => 'routes.php',
         'APP_SERVICES_CACHE' => 'services.php',
     ] as $key => $filename) {
-        putenv($key . '=' . $cachePath . '/' . $filename);
-        $_ENV[$key] = $cachePath . '/' . $filename;
-        $_SERVER[$key] = $cachePath . '/' . $filename;
+        $value = $cachePath . '/' . $filename;
+
+        putenv("$key=$value");
+        $_ENV[$key] = $value;
+        $_SERVER[$key] = $value;
     }
 
-    $step = 'autoload';
     require __DIR__ . '/../vendor/autoload.php';
 
-    $step = 'application';
     $app = require __DIR__ . '/../bootstrap/app.php';
 
-    $step = 'kernel';
     $kernel = $app->make(Kernel::class);
 
-    $step = 'kernel_bootstrap';
-    $kernel->bootstrap();
+    $step = 'handle_request';
 
-    echo json_encode([
-        'status' => 'success',
-        'step' => 'completed',
-        'message' => 'Laravel bootstrap berhasil'
-    ]);
+    $request = Request::capture();
+    $response = $kernel->handle($request);
+
+    $step = 'send_response';
+
+    $response->send();
+    $kernel->terminate($request, $response);
 
 } catch (Throwable $e) {
-    http_response_code(500);
+    error_log('[Laravel Error] ' . (string) $e);
 
-    echo json_encode([
-        'status' => 'error',
-        'failed_step' => $step,
-        'error_type' => get_class($e)
-    ]);
+    if (!headers_sent()) {
+        header('Content-Type: application/json');
+        http_response_code(500);
+
+        echo json_encode([
+            'status' => 'error',
+            'failed_step' => $step,
+            'error_type' => get_class($e)
+        ]);
+    }
 }
