@@ -1,30 +1,20 @@
-
 <?php
 
-ini_set('display_errors', '0');
-error_reporting(E_ALL);
-
 header('Content-Type: application/json');
+ini_set('display_errors', '0');
 
 $step = 'start';
 
 try {
-    $step = 'composer_autoload';
+    $step = 'autoload';
     require __DIR__ . '/../vendor/autoload.php';
 
-    $step = 'bootstrap_laravel';
+    $step = 'bootstrap';
     $app = require __DIR__ . '/../bootstrap/app.php';
-
-    $step = 'laravel_container';
-    $app->make(
-        Illuminate\Contracts\Console\Kernel::class
-    )->bootstrap();
-
-    $step = 'completed';
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Laravel bootstrap berhasil',
+        'message' => 'Laravel application created',
         'step' => $step
     ]);
 
@@ -33,7 +23,7 @@ try {
 
     echo json_encode([
         'status' => 'error',
-        'failed_step' => $step,
-        'error_type' => get_class($e)
+        'step' => $step,
+        'type' => get_class($e)
     ]);
 }
