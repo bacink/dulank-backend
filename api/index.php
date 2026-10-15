@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
 
 header('Content-Type: application/json');
 ini_set('display_errors', '0');
@@ -23,7 +22,6 @@ try {
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Laravel HTTP Kernel berhasil dijalankan',
         'step' => 'completed'
     ]);
 
@@ -33,6 +31,7 @@ try {
     echo json_encode([
         'status' => 'error',
         'failed_step' => $step,
-        'error_type' => get_class($e)
+        'error_type' => get_class($e),
+        'error_message' => $e->getMessage()
     ]);
 }
