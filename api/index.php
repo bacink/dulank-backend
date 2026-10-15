@@ -1,3 +1,4 @@
+
 <?php
 
 ini_set('display_errors', '0');
@@ -5,17 +6,34 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
-$checks = [
-    'php_version' => PHP_VERSION,
-    'vendor_autoload' => file_exists(__DIR__ . '/../vendor/autoload.php'),
-    'bootstrap_app' => file_exists(__DIR__ . '/../bootstrap/app.php'),
-    'storage_directory' => is_dir(__DIR__ . '/../storage'),
-    'bootstrap_cache_directory' => is_dir(__DIR__ . '/../bootstrap/cache'),
-    'app_key_exists' => !empty(getenv('APP_KEY')),
-    'pdo_mysql' => extension_loaded('pdo_mysql'),
-];
+$step = 'start';
 
-echo json_encode([
-    'status' => 'diagnostic',
-    'checks' => $checks
-], JSON_PRETTY_PRINT);
+try {
+    $step = 'composer_autoload';
+    require __DIR__ . '/../vendor/autoload.php';
+
+    $step = 'bootstrap_laravel';
+    $app = require __DIR__ . '/../bootstrap/app.php';
+
+    $step = 'laravel_container';
+    $app->make(
+        Illuminate\Contracts\Console\Kernel::class
+    )->bootstrap();
+
+    $step = 'completed';
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Laravel bootstrap berhasil',
+        'step' => $step
+    ]);
+
+} catch (Throwable $e) {
+    http_response_code(500);
+
+    echo json_encode([
+        'status' => 'error',
+        'failed_step' => $step,
+        'error_type' => get_class($e)
+    ]);
+}
