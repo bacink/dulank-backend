@@ -23,19 +23,23 @@ use Symfony\Component\HttpKernel\Exception\ThrottleRequestsException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // REST API murni: guest tidak pernah dialihkan ke halaman login web.
-        // Tanpa ini, middleware "auth" memanggil route('login') yang tidak ada
-        // dan membalas 500 "Route [login] not defined" alih-alih 401 JSON.
+
+        // REST API: tidak redirect guest ke halaman login.
         $middleware->redirectGuestsTo(null);
 
-        $middleware->appendToGroup('api', BlockBannedIp::class);
+        // Middleware keamanan API.
+        $middleware->appendToGroup(
+            'api',
+            BlockBannedIp::class
+        );
 
+        // Alias middleware autentikasi dan permission.
         $middleware->alias([
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
@@ -45,65 +49,148 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+
+        // Diagnostik sementara untuk menangkap exception.
+        $exceptions->report(function (\Throwable $e): void {
+            error_log(
+                '[LARAVEL ERROR] '
+                . get_class($e)
+                . ': '
+                . $e->getMessage()
+            );
+        });
+
+        // Semua request API menggunakan respons JSON.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) =>
+                $request->is('api/*') || $request->expectsJson()
         );
 
-        $exceptions->render(function (ApiException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            ApiException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            return ApiResponse::error($e->getMessage(), $e->status, $e->errors);
+            return ApiResponse::error(
+                $e->getMessage(),
+                $e->status,
+                $e->errors
+            );
         });
 
-        $exceptions->render(function (ValidationException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            ValidationException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            return ApiResponse::error($e->getMessage(), 422, $e->errors());
+            return ApiResponse::error(
+                $e->getMessage(),
+                422,
+                $e->errors()
+            );
         });
 
-        $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            AuthenticationException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            return ApiResponse::error('Unauthenticated.', 401);
+            return ApiResponse::error(
+                'Unauthenticated.',
+                401
+            );
         });
 
-        $exceptions->render(function (AuthorizationException|AccessDeniedHttpException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            AuthorizationException|AccessDeniedHttpException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            return ApiResponse::error($e->getMessage() !== '' ? $e->getMessage() : 'This action is unauthorized.', 403);
+            return ApiResponse::error(
+                $e->getMessage() !== ''
+                    ? $e->getMessage()
+                    : 'This action is unauthorized.',
+                403
+            );
         });
 
-        $exceptions->render(function (ModelNotFoundException|NotFoundHttpException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            ModelNotFoundException|NotFoundHttpException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            return ApiResponse::error('Resource not found.', 404);
+            return ApiResponse::error(
+                'Resource not found.',
+                404
+            );
         });
 
-        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            ThrottleRequestsException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            return ApiResponse::error('Too many requests.', 429);
+            return ApiResponse::error(
+                'Too many requests.',
+                429
+            );
         });
 
-        $exceptions->render(function (HttpException $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+        $exceptions->render(function (
+            HttpException $e,
+            Request $request
+        ) {
+            if (
+                ! $request->is('api/*')
+                && ! $request->expectsJson()
+            ) {
                 return null;
             }
 
-            $message = $e->getMessage() !== '' ? $e->getMessage() : 'HTTP error.';
+            $message = $e->getMessage() !== ''
+                ? $e->getMessage()
+                : 'HTTP error.';
 
-            return ApiResponse::error($message, $e->getStatusCode());
+            return ApiResponse::error(
+                $message,
+                $e->getStatusCode()
+            );
         });
-    })->create();
+    })
+    ->create();
