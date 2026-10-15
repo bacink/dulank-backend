@@ -16,6 +16,11 @@ class BlockBannedIp
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Liveness checks must not depend on the ban-list database query.
+        if ($request->is('api/health')) {
+            return $next($request);
+        }
+
         /** @var array<int, string> $banned */
         $banned = Cache::remember(
             'ban_ips',
