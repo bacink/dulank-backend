@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
+
 header('Content-Type: application/json');
 ini_set('display_errors', '0');
 
@@ -9,13 +12,19 @@ try {
     $step = 'autoload';
     require __DIR__ . '/../vendor/autoload.php';
 
-    $step = 'bootstrap';
+    $step = 'application';
     $app = require __DIR__ . '/../bootstrap/app.php';
+
+    $step = 'http_kernel';
+    $kernel = $app->make(Kernel::class);
+
+    $step = 'kernel_bootstrap';
+    $kernel->bootstrap();
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Laravel application created',
-        'step' => $step
+        'message' => 'Laravel HTTP Kernel berhasil dijalankan',
+        'step' => 'completed'
     ]);
 
 } catch (Throwable $e) {
@@ -23,7 +32,7 @@ try {
 
     echo json_encode([
         'status' => 'error',
-        'step' => $step,
-        'type' => get_class($e)
+        'failed_step' => $step,
+        'error_type' => get_class($e)
     ]);
 }
