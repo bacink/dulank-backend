@@ -1,0 +1,270 @@
+[
+  {
+    "id": "2504027H2DQ68B",
+    "userId": 1,
+    "status": "delivered",
+    "date": "2025-04-14",
+    "items": [
+      {
+        "productId": 1,
+        "name": "Brosur PPDN SMAN 1 Bandung",
+        "category": "Brosur Full Color",
+        "quantity": 100,
+        "price": 65000,
+        "total": 650000,
+        "spec": "Brosur Full Color A4 (210×297 Milimeter), Art paper 150gr, Tanpa Laminasi, Tanpa Lipatan",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK",
+        "note": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      }
+    ],
+    "shippingAddress": {
+      "name": "Ahmad Dhani",
+      "phone": "(+62) 852053769",
+      "type": "Office",
+      "street": "Toko Kelontong Depan Desa Teluk Jambe, 515 Sarah Shore Suite 828, Port Kennethstad",
+      "district": "TELUK JAMBE TIMUR",
+      "city": "KAB. KARAWANG",
+      "province": "JAWA BARAT",
+      "postalCode": "41360",
+      "country": "ID"
+    },
+    "total": 650000,
+    "timeline": [
+      { "status": "ordered", "date": "2025-04-10 09:00 WIB" },
+      { "status": "production", "date": "2025-04-11 08:30 WIB" },
+      { "status": "shipped", "date": "2025-04-14 10:33 WIB" },
+      { "status": "delivered", "date": "2025-04-14 14:00 WIB" }
+    ]
+  },
+  {
+    "id": "2505150A3CR79C",
+    "userId": 1,
+    "status": "production",
+    "date": "2025-05-15",
+    "items": [
+      {
+        "productId": 2,
+        "name": "Kaos Family Gathering",
+        "category": "Kaos Custom Print",
+        "quantity": 50,
+        "price": 85000,
+        "total": 4250000,
+        "spec": "Cotton combed 30s, sablon plastisol, ukuran campur S-XXL",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna sesuai sampel",
+        "note": "Pisahkan ukuran berdasarkan daftar peserta."
+      },
+      {
+        "productId": 3,
+        "name": "Sticker Label Produk",
+        "category": "Sticker A3+",
+        "quantity": 200,
+        "price": 15000,
+        "total": 3000000,
+        "spec": "Sticker vinyl A3+, laminasi glossy, kiss cut",
+        "artwork": "Belum ada design",
+        "printResult": "Warna Standard CMYK",
+        "note": "Tim desain bantu layout label sebelum produksi."
+      }
+    ],
+    "shippingAddress": {
+      "name": "Ahmad Dhani",
+      "phone": "(+62) 852053769",
+      "type": "Office",
+      "street": "Toko Kelontong Depan Desa Teluk Jambe",
+      "district": "TELUK JAMBE TIMUR",
+      "city": "KAB. KARAWANG",
+      "province": "JAWA BARAT",
+      "postalCode": "41360",
+      "country": "ID"
+    },
+    "total": 7250000,
+    "timeline": [
+      { "status": "ordered", "date": "2025-05-15 11:15 WIB" },
+      { "status": "payment-confirmed", "date": "2025-05-15 13:20 WIB" },
+      { "status": "production", "date": "2025-05-16 09:00 WIB" }
+    ]
+  },
+  {
+    "id": "2506012B4DS80D",
+    "userId": 1,
+    "status": "awaiting-payment",
+    "date": "2025-06-01",
+    "items": [
+      {
+        "productId": 5,
+        "name": "Banner Promo Juni",
+        "category": "Banner Vinyl",
+        "quantity": 10,
+        "price": 45000,
+        "total": 450000,
+        "spec": "Vinyl 340gr, ukuran 1×3 meter, finishing mata ayam",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK",
+        "note": "Cetak outdoor untuk depan toko."
+      }
+    ],
+    "shippingAddress": {
+      "name": "Ahmad Dhani",
+      "phone": "(+62) 852053769",
+      "type": "Office",
+      "street": "Toko Kelontong Depan Desa Teluk Jambe",
+      "district": "TELUK JAMBE TIMUR",
+      "city": "KAB. KARAWANG",
+      "province": "JAWA BARAT",
+      "postalCode": "41360",
+      "country": "ID"
+    },
+    "total": 450000,
+    "timeline": [
+      { "status": "ordered", "date": "2025-06-01 10:45 WIB" },
+      { "status": "awaiting-payment", "date": "2025-06-01 10:50 WIB" }
+    ]
+  },
+  {
+    "id": "2506125C9FG12E",
+    "userId": 1,
+    "status": "awaiting-confirmation",
+    "date": "2025-06-12",
+    "items": [
+      {
+        "productId": 7,
+        "name": "Kalender Meja 2026",
+        "category": "Kalender",
+        "quantity": 300,
+        "price": 27500,
+        "total": 8250000,
+        "spec": "Ukuran 21×15 cm, 13 lembar, spiral, Art Carton 260gr",
+        "artwork": "Desain dibantu tim Dulank",
+        "printResult": "Warna Standard CMYK",
+        "note": "Logo perusahaan ditempatkan di setiap halaman."
+      }
+    ],
+    "shippingAddress": {
+      "name": "PT. Sentosa Digital",
+      "phone": "(+62) 81122233344",
+      "type": "Office",
+      "street": "Jl. Asia Afrika No. 12",
+      "district": "SUMUR BANDUNG",
+      "city": "KOTA BANDUNG",
+      "province": "JAWA BARAT",
+      "postalCode": "40111",
+      "country": "ID"
+    },
+    "total": 9257500,
+    "timeline": [
+      { "status": "ordered", "date": "2025-06-12 15:00 WIB" },
+      { "status": "awaiting-confirmation", "date": "2025-06-12 15:10 WIB" }
+    ]
+  },
+  {
+    "id": "2506188D1HK55F",
+    "userId": 1,
+    "status": "design",
+    "date": "2025-06-18",
+    "items": [
+      {
+        "productId": 8,
+        "name": "Packaging Box Produk",
+        "category": "Kemasan",
+        "quantity": 2000,
+        "price": 6200,
+        "total": 12400000,
+        "spec": "Ivory 350gr, pond custom, laminasi doff, hotprint gold",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK + Foil",
+        "note": "Dibutuhkan sample dummy sebelum produksi."
+      }
+    ],
+    "shippingAddress": {
+      "name": "Brand Lokal Nusantara",
+      "phone": "(+62) 87788899900",
+      "type": "Warehouse",
+      "street": "Jl. Industri Kreatif No. 8",
+      "district": "CIBITUNG",
+      "city": "KAB. BEKASI",
+      "province": "JAWA BARAT",
+      "postalCode": "17520",
+      "country": "ID"
+    },
+    "total": 13939000,
+    "timeline": [
+      { "status": "ordered", "date": "2025-06-18 09:30 WIB" },
+      { "status": "design", "date": "2025-06-18 14:00 WIB" }
+    ]
+  },
+  {
+    "id": "2506206E7LM31G",
+    "userId": 1,
+    "status": "shipped",
+    "date": "2025-06-20",
+    "items": [
+      {
+        "productId": 9,
+        "name": "Kartu Nama Marketing",
+        "category": "Kartu Nama",
+        "quantity": 500,
+        "price": 75000,
+        "total": 37500000,
+        "spec": "Art Carton 310gr, matte laminasi, cetak 2 sisi",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK",
+        "note": "Nama dan nomor telepon berbeda untuk 5 orang."
+      }
+    ],
+    "shippingAddress": {
+      "name": "CV. Sejahtera",
+      "phone": "(+62) 82345678901",
+      "type": "Office",
+      "street": "Jl. Merdeka No. 44",
+      "district": "CIKARANG PUSAT",
+      "city": "KAB. BEKASI",
+      "province": "JAWA BARAT",
+      "postalCode": "17530",
+      "country": "ID"
+    },
+    "total": 41625000,
+    "timeline": [
+      { "status": "ordered", "date": "2025-06-20 08:15 WIB" },
+      { "status": "production", "date": "2025-06-20 13:00 WIB" },
+      { "status": "shipped", "date": "2025-06-21 16:45 WIB" }
+    ]
+  },
+  {
+    "id": "2506259F2NP84H",
+    "userId": 1,
+    "status": "cancelled",
+    "date": "2025-06-25",
+    "items": [
+      {
+        "productId": 10,
+        "name": "Poster Event A2",
+        "category": "Poster",
+        "quantity": 50,
+        "price": 18000,
+        "total": 900000,
+        "spec": "A2, Art Paper 150gr, cetak full color 1 sisi",
+        "artwork": "Belum ada design",
+        "printResult": "Warna Standard CMYK",
+        "note": "Order dibatalkan oleh pelanggan sebelum produksi."
+      }
+    ],
+    "shippingAddress": {
+      "name": "Komunitas Kreatif Karawang",
+      "phone": "(+62) 81222255577",
+      "type": "Home",
+      "street": "Jl. Galuh Mas Raya",
+      "district": "TELUK JAMBE TIMUR",
+      "city": "KAB. KARAWANG",
+      "province": "JAWA BARAT",
+      "postalCode": "41361",
+      "country": "ID"
+    },
+    "total": 999000,
+    "timeline": [
+      { "status": "ordered", "date": "2025-06-25 12:00 WIB" },
+      { "status": "cancelled", "date": "2025-06-25 13:30 WIB" }
+    ]
+  }
+]

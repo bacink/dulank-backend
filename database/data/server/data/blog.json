@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "slug": "cara-efektif-meningkatkan-cta",
+    "title": "Cara Efektif Meningkatkan Call To Action (CTA) untuk Digital Marketing",
+    "excerpt": "Pelajari strategi meningkatkan CTA yang efektif untuk campaign digital marketing Anda.",
+    "content": "Call to Action (CTA) adalah elemen kunci dalam digital marketing yang mengarahkan audiens untuk mengambil tindakan tertentu.",
+    "date": "2025-05-09",
+    "author": "Dulank Team",
+    "image": "/images/brosur.jpg",
+    "tags": ["marketing", "cta"]
+  },
+  {
+    "id": 2,
+    "slug": "perbedaan-ip-public-dan-ip-private",
+    "title": "Perbedaan IP Public dan IP Private: Panduan Lengkap",
+    "excerpt": "Memahami perbedaan antara IP Public dan IP Private serta fungsinya dalam jaringan.",
+    "content": "IP address adalah identifikasi unik untuk setiap perangkat yang terhubung ke jaringan.",
+    "date": "2025-05-08",
+    "author": "Dulank Team",
+    "image": "/images/kaos.jpg",
+    "tags": ["teknologi", "networking"]
+  },
+  {
+    "id": 3,
+    "slug": "mengamankan-data-di-cloud",
+    "title": "Mengamankan Data di Cloud: Tips dan Trik Terbaik",
+    "excerpt": "Tips praktis untuk mengamankan data sensitif Anda di layanan cloud storage.",
+    "content": "Di era digital ini, banyak perusahaan dan individu menggunakan layanan cloud untuk menyimpan data mereka.",
+    "date": "2025-05-07",
+    "author": "Dulank Team",
+    "image": "/images/sticker.jpg",
+    "tags": ["keamanan", "cloud"]
+  },
+  {
+    "id": 4,
+    "slug": "tips-cetak-brosur-profesional",
+    "title": "Tips Mencetak Brosur Profesional untuk Bisnis Anda",
+    "excerpt": "Panduan lengkap mencetak brosur yang menarik dan profesional.",
+    "content": "Mencetak brosur adalah salah satu cara efektif untuk promosi bisnis.",
+    "date": "2025-05-05",
+    "author": "Dulank Team",
+    "image": "/images/brosur.jpg",
+    "tags": ["cetak", "brosur", "bisnis"]
+  }
+]

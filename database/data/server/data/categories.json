@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Stationary - ATK",
+    "slug": "stationary-atk",
+    "description": "Perlengkapan kantor dan tulis menulis",
+    "image": "/images/brosur.jpg",
+    "productCount": 18
+  },
+  {
+    "id": 2,
+    "name": "Nota, Buku, Compro, Majalah",
+    "slug": "nota-buku-compro-majalah",
+    "description": "Cetak nota, buku, compro, dan majalah",
+    "image": "/images/yasin.jpg",
+    "productCount": 9
+  },
+  {
+    "id": 3,
+    "name": "Packaging",
+    "slug": "packaging",
+    "description": "Kemasan produk dan packaging custom",
+    "image": "/images/kaos.jpg",
+    "productCount": 22
+  },
+  {
+    "id": 4,
+    "name": "Promotion",
+    "slug": "promotion",
+    "description": "Media promosi dan advertising",
+    "image": "/images/sticker.jpg",
+    "productCount": 15
+  },
+  {
+    "id": 5,
+    "name": "Merchandise",
+    "slug": "merchandise",
+    "description": "Produk merchandise custom",
+    "image": "/images/yasin.jpg",
+    "productCount": 12
+  },
+  {
+    "id": 6,
+    "name": "Banner",
+    "slug": "banner",
+    "description": "Cetak banner dan spanduk",
+    "image": "/images/brosur.jpg",
+    "productCount": 17
+  }
+]

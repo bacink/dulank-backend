@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "Ahmad Dhani",
+    "email": "ahmad@example.com",
+    "phone": "+62852053769",
+    "avatar": "/images/profile.png",
+    "joinDate": "2025-12-15T19:30:00+07:00",
+    "lastLogin": "2025-12-25T15:25:00+07:00",
+    "companyType": "CV",
+    "companyName": "Dulank Semesta Cida",
+    "departmentName": "Purchasing",
+    "npwp": "1234567890123456",
+    "transactionCode": "01 - Kepada selain pemungut PPN",
+    "taxAddress": "Jl. Arif Rahman Hakim / Niaga, Karawang Barat, Karawang",
+    "attachTaxInvoice": false
+  }
+]

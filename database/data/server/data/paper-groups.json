@@ -1,0 +1,5 @@
+[
+  { "id": 1, "source": "Percetakan Grafika", "name": "Art Paper", "brand": "Ika Paper", "updatedAt": "2025-06-13" },
+  { "id": 2, "source": "Milik Sendiri", "name": "HVS", "brand": "Sinar Dunia", "updatedAt": "2025-06-13" },
+  { "id": 3, "source": "Toko Kertasindo", "name": "Art Carton", "brand": "Ika Paper", "updatedAt": "2025-06-13" }
+]

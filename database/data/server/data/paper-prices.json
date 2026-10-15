@@ -1,0 +1,6 @@
+[
+  { "id": 1, "source": "Percetakan Grafika", "name": "Art Paper 150 GSM", "group": "Art Paper", "price": 500000, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 2, "source": "Milik Sendiri", "name": "HVS 70 GSM", "group": "HVS", "price": 350000, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 3, "source": "Toko Kertasindo", "name": "Art Carton 230 GSM", "group": "Art Carton", "price": 620000, "updatedAt": "2025-06-13", "published": true, "active": false },
+  { "id": 4, "source": "Percetakan Grafika", "name": "Art Carton - Ika 250 GSM", "group": "Art Carton", "price": 680000, "updatedAt": "2025-06-13", "published": false, "active": false }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "title": "Brosur Flyer ukuran A4",
+    "discount": "Sale 20% off all store",
+    "image": "/images/brosur.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Buku Yasin",
+    "discount": "Sale 35%",
+    "image": "/images/yasin.jpg"
+  }
+]

@@ -1,0 +1,4 @@
+[
+  { "id": "cart-1", "productId": 4, "name": "Yasin Tahlil", "image": "/images/yasin.jpg", "quantity": 10, "price": 65000, "spec": "A4 (210x297 mm), Art Paper 150gr, Tanpa Laminasi, Tanpa Lipatan" },
+  { "id": "cart-2", "productId": 1, "name": "Brosur Full Color", "image": "/images/brosur.jpg", "quantity": 10, "price": 65000, "spec": "A4 (210x297 mm), Art Paper 150gr, Tanpa Laminasi, Tanpa Lipatan" }
+]

@@ -1,0 +1,15 @@
+[
+  { "id": 1, "kind": "printing", "source": "Percetakan Grafika", "name": "Heidelberg GTO52 4 Warna", "size": "52x72 cm", "price": 240000, "unitPrice": 60, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 2, "kind": "printing", "source": "Milik Sendiri", "name": "Heidelberg GTO52 4 Warna", "size": "52x72 cm", "price": 240000, "unitPrice": 60, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 10, "kind": "printing", "source": "Percetakan Grafika", "name": "Heidelberg GTO52 4 Warna", "size": "52x72 cm", "price": 240000, "unitPrice": 60, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 11, "kind": "printing", "source": "Milik Sendiri", "name": "Heidelberg MOV 66 4 Warna", "size": "66x96 cm", "price": 320000, "unitPrice": 80, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 12, "kind": "printing", "source": "Percetakan Grafika", "name": "Heidelberg SM74 4 Warna", "size": "52x74 cm", "price": 300000, "unitPrice": 75, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 3, "kind": "lamination", "source": "Milik Sendiri", "name": "Laminasi Doff", "size": "12x30 cm", "price": 200000, "unitPrice": 20, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 4, "kind": "lamination", "source": "Milik Sendiri", "name": "Laminasi Glossy", "size": "12x30 cm", "price": 180000, "unitPrice": 18, "updatedAt": "2025-06-13", "published": false, "active": false },
+  { "id": 5, "kind": "lamination", "source": "Milik Sendiri", "name": "UV Vernish", "size": "12x30 cm", "price": 100000, "unitPrice": 10, "updatedAt": "2025-06-13", "published": false, "active": true },
+  { "id": 6, "kind": "die-cutting", "source": "Milik Sendiri", "name": "Mesin Pond Kecil", "size": "79x109 cm", "price": 50000, "unitPrice": 50, "updatedAt": "2025-06-13", "published": true, "active": false },
+  { "id": 7, "kind": "die-cutting", "source": "Percetakan Grafika", "name": "Mesin Pond Sedang", "size": "79x109 cm", "price": 100000, "unitPrice": 100, "updatedAt": "2025-06-13", "published": true, "active": true },
+  { "id": 13, "kind": "die-cutting", "source": "Percetakan Grafika", "name": "Mesin Pond Besar", "size": "79x109 cm", "price": 150000, "unitPrice": 150, "updatedAt": "2025-06-13", "published": true, "active": false },
+  { "id": 8, "kind": "foil", "source": "Milik Sendiri", "name": "Standard", "size": "30x15 cm", "price": 200000, "unitPrice": 20, "updatedAt": "2025-06-13", "published": true, "active": false },
+  { "id": 9, "kind": "foil", "source": "Milik Sendiri", "name": "Hologram", "size": "30x15 cm", "price": 180000, "unitPrice": 18, "updatedAt": "2025-06-13", "published": false, "active": false }
+]

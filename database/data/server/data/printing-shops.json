@@ -1,0 +1,4 @@
+[
+  { "id": 1, "name": "Percetakan Grafika", "province": "DKI Jakarta", "city": "Jakarta Pusat", "district": "Kemayoran", "followers": "5,3RB", "following": 195, "paperCount": 117, "printingCount": 4, "laminationCount": 2, "dieCuttingCount": 4, "foilCount": 8, "image": "/images/tab.png" },
+  { "id": 2, "name": "Percetakan Grafika Karawang", "province": "Jawa Barat", "city": "Karawang", "district": "Karawang Barat", "followers": "1,2RB", "following": 86, "paperCount": 42, "printingCount": 2, "laminationCount": 1, "dieCuttingCount": 1, "foilCount": 2, "image": "/images/tab.png" }
+]

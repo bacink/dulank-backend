@@ -1,0 +1,4 @@
+[
+  { "id": 1, "name": "Toko Kertasindo", "province": "DKI Jakarta", "city": "Jakarta Pusat", "district": "Kemayoran", "followers": "5,3RB", "following": 195, "groupCount": 117, "typeCount": 4, "image": "/images/tab.png" },
+  { "id": 2, "name": "Toko Kertas Karawang", "province": "Jawa Barat", "city": "Karawang", "district": "Telukjambe Timur", "followers": "820", "following": 41, "groupCount": 24, "typeCount": 8, "image": "/images/tab.png" }
+]

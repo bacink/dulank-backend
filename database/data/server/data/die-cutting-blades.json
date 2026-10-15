@@ -1,0 +1,4 @@
+[
+  { "id": 1, "name": "Papan", "pricePerCm": 500, "updatedAt": "2025-06-13", "published": true, "active": false },
+  { "id": 2, "name": "Piso/Rel", "pricePerCm": 25, "updatedAt": "2025-06-13", "published": true, "active": true }
+]

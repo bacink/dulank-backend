@@ -1,0 +1,4 @@
+[
+  { "id": 1, "userId": 1, "recipientName": "Ahmad Dhani", "phone": "(+62) 852053769", "type": "Office", "name": "Toko Kelontong Depan Desa Teluk Jambe", "street": "515 Sarah Shore Suite 828, Port Kennethstad (Depan Stasiun)", "district": "TELUK JAMBE TIMUR", "city": "KAB. KARAWANG", "province": "JAWA BARAT", "postalCode": "41360", "country": "ID" },
+  { "id": 2, "userId": 1, "recipientName": "Once Mekel", "phone": "(+62) 852053769", "type": "Building", "name": "Toko Kelontong Depan Desa Teluk Jambe", "street": "515 Sarah Shore Suite 828, Port Kennethstad (Depan Stasiun)", "district": "TELUK JAMBE TIMUR", "city": "KAB. KARAWANG", "province": "JAWA BARAT", "postalCode": "41360", "country": "ID" }
+]

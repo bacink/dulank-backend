@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "question": "Berapa lama waktu pengerjaan pesanan?",
+    "answer": "Waktu pengerjaan tergantung jenis produk dan volume pesanan. Brosur A4 biasanya selesai dalam 1-3 hari kerja. Untuk pesanan massal atau produk khusus, hubungi kami untuk estimasi waktu.",
+    "category": "pemesanan"
+  },
+  {
+    "id": 2,
+    "question": "Apakah bisa order dalam jumlah kecil?",
+    "answer": "Ya, kami menerima pesanan dalam jumlah kecil maupun besar. Minimal order berbeda tergantung jenis produk. Silakan konsultasi terlebih dahulu.",
+    "category": "pemesanan"
+  },
+  {
+    "id": 3,
+    "question": "Bagaimana cara melakukan pembayaran?",
+    "answer": "Pembayaran dapat dilakukan melalui transfer bank (BCA, Mandiri, BNI), e-wallet, atau COD untuk area tertentu. Detail rekening akan dikirimkan setelah konfirmasi pesanan.",
+    "category": "pembayaran"
+  },
+  {
+    "id": 4,
+    "question": "Apakah tersedia layanan pengiriman ke seluruh Indonesia?",
+    "answer": "Ya, kami melayani pengiriman ke seluruh Indonesia melalui ekspedisi terpercaya. Biaya ongkir ditanggung pembeli dan dihitung berdasarkan berat serta lokasi tujuan.",
+    "category": "pengiriman"
+  },
+  {
+    "id": 5,
+    "question": "Bagaimana mengajukan revisi cetakan?",
+    "answer": "Revisi dapat dilakukan sebelum proses cetak dimulai. Jika sudah dalam proses cetak, mungkin ada biaya tambahan. Hubungi CS kami secepatnya jika ingin merevisi file.",
+    "category": "pemesanan"
+  },
+  {
+    "id": 6,
+    "question": "Apa file yang dibutuhkan untuk pemesanan cetak?",
+    "answer": "File cetak yang kami terima adalah format PDF, AI, atau PSD dengan resolusi minimal 300dpi. Pastikan warna dalam mode CMYK dan ada bleed 3mm.",
+    "category": "teknis"
+  },
+  {
+    "id": 7,
+    "question": "Apakah ada layanan desain grafis?",
+    "answer": "Ya, kami menyediakan jasa desain grafis dengan biaya tambahan. Tim desainer kami siap membantu membuat desain sesuai kebutuhan Anda.",
+    "category": "layanan"
+  },
+  {
+    "id": 8,
+    "question": "Bagaimana cara melacak status pesanan?",
+    "answer": "Anda dapat melacak status pesanan melalui halaman Riwayat Pesanan di akun Anda. Kami juga akan mengirimkan notifikasi via email saat status berubah.",
+    "category": "pemesanan"
+  }
+]

@@ -1,0 +1,111 @@
+[
+  {
+    "id": 1,
+    "name": "Brosur Full Color A4",
+    "slug": "brosur-full-color-a4",
+    "categoryId": 1,
+    "description": "Cetak brosur full color ukuran A4 dengan kualitas tinggi",
+    "priceFrom": 50000,
+    "priceTo": 300000,
+    "image": "/images/brosur.jpg",
+    "specs": [
+      {
+        "group": "Ukuran",
+        "options": ["A4 (210x297mm)", "A5 (148x210mm)", "A3 (297x420mm)"]
+      },
+      {
+        "group": "Kertas",
+        "options": ["Art Paper 150gr", "Art Paper 200gr", "Art Carton 260gr"]
+      },
+      {
+        "group": "Laminasi",
+        "options": ["Tanpa Laminasi", "Laminasi Doff", "Laminasi Glossy"]
+      }
+    ],
+    "tags": ["brosur", "full-color", "a4"]
+  },
+  {
+    "id": 2,
+    "name": "Kaos Custom Print",
+    "slug": "kaos-custom-print",
+    "categoryId": 5,
+    "description": "Sablon kaos custom dengan berbagai pilihan desain",
+    "priceFrom": 75000,
+    "priceTo": 150000,
+    "image": "/images/kaos.jpg",
+    "specs": [
+      { "group": "Ukuran", "options": ["S", "M", "L", "XL", "XXL"] },
+      {
+        "group": "Jenis Kain",
+        "options": ["Cotton Combed 30s", "Cotton Peached", "Dry Fit"]
+      },
+      {
+        "group": "Teknik Sablon",
+        "options": ["Sablon DTF", "Sablon Manual", "Sublimasi"]
+      }
+    ],
+    "tags": ["kaos", "custom", "sablon"]
+  },
+  {
+    "id": 3,
+    "name": "Sticker A3+",
+    "slug": "sticker-a3-plus",
+    "categoryId": 3,
+    "description": "Sticker custom ukuran A3+ dengan material berkualitas",
+    "priceFrom": 10000,
+    "priceTo": 30000,
+    "image": "/images/sticker.jpg",
+    "specs": [
+      {
+        "group": "Ukuran",
+        "options": ["A4 (210x297mm)", "A3 (297x420mm)", "A3+ (329x483mm)"]
+      },
+      {
+        "group": "Material",
+        "options": ["Sticker Vinyl", "Sticker Holografik", "Sticker Transparan"]
+      },
+      { "group": "Finishing", "options": ["Cut Sticker", "Leaflet", "Roll"] }
+    ],
+    "tags": ["sticker", "custom", "packaging"]
+  },
+  {
+    "id": 4,
+    "name": "Buku Yasin",
+    "slug": "buku-yasin",
+    "categoryId": 2,
+    "description": "Cetak buku Yasin dengan kualitas tinggi",
+    "priceFrom": 25000,
+    "priceTo": 75000,
+    "image": "/images/yasin.jpg",
+    "specs": [
+      { "group": "Jilid", "options": ["Jilid Lem", "Jilid Kawat"] },
+      {
+        "group": "Kertas",
+        "options": ["HVS 70gr", "Art Paper 150gr", "Art Carton 260gr"]
+      },
+      { "group": "Ukuran", "options": ["A5 (148x210mm)", "Small (12x17cm)"] }
+    ],
+    "tags": ["buku", "yasin", "jilid"]
+  },
+  {
+    "id": 5,
+    "name": "Banner Vinyl",
+    "slug": "banner-vinyl",
+    "categoryId": 6,
+    "description": "Cetak banner vinyl untuk outdoor dan indoor",
+    "priceFrom": 15000,
+    "priceTo": 150000,
+    "image": "/images/brosur.jpg",
+    "specs": [
+      {
+        "group": "Material",
+        "options": ["Vinyl 440gr", "Vinyl 510gr", "Mesh Banner"]
+      },
+      {
+        "group": "Finishing",
+        "options": ["Tanpa Finishing", "Lubang Tambang", "Paku Keling", "Roll"]
+      }
+    ],
+    "tags": ["banner", "vinyl", "outdoor"]
+  }
+]

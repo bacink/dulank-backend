@@ -1,0 +1,39 @@
+[
+  {
+    "id": "TK-001",
+    "userId": 1,
+    "subject": "Pesanan belum diterima setelah 5 hari",
+    "type": "Complaint",
+    "message": "Saya memesan brosur pada tanggal 10 April dan sampai sekarang belum diterima. No. Pesanan: 2504027H2DQ68B. Mohon infonya.",
+    "priority": "high",
+    "status": "open",
+    "date": "2025-04-15",
+    "replies": [
+      { "from": "support", "message": "Halo Pak Ahmad, terima kasih telah menghubungi kami. Kami akan segera menindaklanjuti pesanan Anda.", "date": "2025-04-15" }
+    ]
+  },
+  {
+    "id": "TK-002",
+    "userId": 1,
+    "subject": "Pertanyaan tentang kualitas cetak",
+    "type": "Info Inquiry",
+    "message": "Apakah warna cetak sudah sesuai dengan file yang saya kirim? Saya ingin memastikan kualitas sebelum order ulang dalam jumlah besar.",
+    "priority": "medium",
+    "status": "resolved",
+    "date": "2025-05-02",
+    "replies": [
+      { "from": "support", "message": "Halo, warna cetak kami menggunakan sistem CMYK sehingga hasilnya sudah sesuai dengan file desain. Jika ada sedikit perbedaan, itu wajar karena karakter cetak.", "date": "2025-05-02" }
+    ]
+  },
+  {
+    "id": "TK-003",
+    "userId": 1,
+    "subject": "Permintaan revisi desain banner",
+    "type": "Partner Request",
+    "message": "Saya ingin merevisi desain banner yang sudah dibuat. Apakah bisa diubah warnanya menjadi lebih terang?",
+    "priority": "low",
+    "status": "open",
+    "date": "2025-05-20",
+    "replies": []
+  }
+]

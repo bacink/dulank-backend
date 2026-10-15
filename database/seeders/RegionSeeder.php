@@ -22,10 +22,10 @@ class RegionSeeder extends Seeder
         $storePath = (string) config('dulank.import.store_path');
         $adminPath = (string) config('dulank.import.admin_path');
 
-        $this->seedProvinces($storePath.'/public/json/provinsi.json');
-        $this->seedRegencies($storePath.'/public/json/kota-kabupaten.json');
-        $this->seedDistricts($adminPath.'/data/districts.json');
-        $this->seedPostalCodes($storePath.'/public/json/kodepos.json');
+        $this->seedProvinces($storePath . '/provinsi.json');
+        $this->seedRegencies($storePath . '/kota-kabupaten.json');
+        $this->seedDistricts($adminPath . '/districts.json');
+        $this->seedPostalCodes($storePath . '/kodepos.json');
     }
 
     private function seedProvinces(string $path): void
@@ -46,7 +46,7 @@ class RegionSeeder extends Seeder
             );
         }
 
-        $this->command?->info('RegionSeeder: '.count($rows).' provinsi.');
+        $this->command?->info('RegionSeeder: ' . count($rows) . ' provinsi.');
     }
 
     private function seedRegencies(string $path): void
@@ -101,12 +101,12 @@ class RegionSeeder extends Seeder
             ->join('provinces', 'provinces.id', '=', 'regencies.province_id')
             ->selectRaw('regencies.id, regencies.name as regency_name, provinces.name as province_name')
             ->get()
-            ->keyBy(fn ($row) => mb_strtolower($row->province_name.'|'.$this->normalizeRegionName($row->regency_name)));
+            ->keyBy(fn($row) => mb_strtolower($row->province_name . '|' . $this->normalizeRegionName($row->regency_name)));
 
         $count = 0;
 
         foreach ($rows as $row) {
-            $key = mb_strtolower(($row['province'] ?? '').'|'.$this->normalizeRegionName((string) ($row['regency'] ?? '')));
+            $key = mb_strtolower(($row['province'] ?? '') . '|' . $this->normalizeRegionName((string) ($row['regency'] ?? '')));
             $regencyId = $regencyIds[$key]->id ?? null;
 
             if ($regencyId === null) {
@@ -161,6 +161,6 @@ class RegionSeeder extends Seeder
             DB::table('postal_codes')->insert($insert);
         }
 
-        $this->command?->info('RegionSeeder: '.count($rows).' kode pos.');
+        $this->command?->info('RegionSeeder: ' . count($rows) . ' kode pos.');
     }
 }

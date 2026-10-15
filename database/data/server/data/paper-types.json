@@ -1,0 +1,4 @@
+[
+  { "id": 1, "source": "Percetakan Grafika", "name": "Art Paper", "group": "Art Paper", "gsm": 150, "updatedAt": "2025-06-13" },
+  { "id": 2, "source": "Milik Sendiri", "name": "HVS", "group": "HVS", "gsm": 70, "updatedAt": "2025-06-13" }
+]

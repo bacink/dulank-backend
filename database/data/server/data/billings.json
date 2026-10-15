@@ -1,0 +1,5 @@
+[
+  { "id": "600449168", "userId": 1, "orderId": "2504027H2DQ68B", "invoiceDate": "2025-06-13", "dueDate": "2025-07-13", "total": 650000, "status": "Unpaid" },
+  { "id": "600449169", "userId": 1, "orderId": "2505150A3CR79C", "invoiceDate": "2025-06-12", "dueDate": "2025-07-12", "total": 7250000, "status": "Paid" },
+  { "id": "600449170", "userId": 1, "orderId": "2506259F2NP84H", "invoiceDate": "2025-06-11", "dueDate": "2025-07-11", "total": 999000, "status": "Cancelled" }
+]

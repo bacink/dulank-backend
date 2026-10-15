@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "productId": 1,
+    "name": "Yasin Tahlil",
+    "image": "/images/yasin.jpg",
+    "price": 65000,
+    "spec": "Brosur Full Color A4 (210×297 Milimeter), Art paper 150gr, Tanpa Laminasi, Tanpa Lipatan",
+    "addedAt": "2025-05-01",
+    "expireDate": "25/6/2025",
+    "expired": false
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "productId": 2,
+    "name": "Brosur Full Color",
+    "image": "/images/brosur.jpg",
+    "price": 65000,
+    "spec": "Brosur Full Color A4 (210×297 Milimeter), Art paper 150gr, Tanpa Laminasi, Tanpa Lipatan",
+    "addedAt": "2025-05-05",
+    "expireDate": "25/6/2025",
+    "expired": true
+  }
+]

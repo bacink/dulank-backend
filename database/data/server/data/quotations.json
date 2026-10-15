@@ -1,0 +1,144 @@
+[
+  {
+    "id": "QT-001",
+    "userId": 1,
+    "date": "2025-05-01",
+    "validUntil": "2025-05-31",
+    "status": "accepted",
+    "items": [
+      {
+        "productId": 1,
+        "name": "Brosur PPDN SMAN 1 Bandung",
+        "category": "Brosur Full Color",
+        "quantity": 500,
+        "spec": "A4 (210x297 mm), Art Paper 150gr, Doff Laminasi, Tanpa Lipatan",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK",
+        "note": "Proof digital dikirim sebelum produksi massal.",
+        "unitPrice": 45000,
+        "total": 22500000
+      }
+    ],
+    "customerInfo": { "name": "PT. Maju Jaya", "email": "info@majujaya.com", "phone": "+6281234567890" },
+    "subtotal": 22500000,
+    "tax": 2475000,
+    "shippingCost": 0,
+    "total": 24975000
+  },
+  {
+    "id": "QT-002",
+    "userId": 1,
+    "date": "2025-05-10",
+    "validUntil": "2025-06-09",
+    "status": "pending",
+    "items": [
+      {
+        "productId": 4,
+        "name": "Yasin Tahlil 40 Hari",
+        "category": "Buku Yasin",
+        "quantity": 1000,
+        "spec": "A5, Isi HVS 70gr, Cover Art Carton 230gr, Jilid Lem",
+        "artwork": "Desain dibantu tim Dulank",
+        "printResult": "Warna Standard CMYK",
+        "note": "Nama keluarga dan foto dikirim menyusul.",
+        "unitPrice": 8000,
+        "total": 8000000
+      },
+      {
+        "productId": 9,
+        "name": "Kartu Nama Marketing",
+        "category": "Kartu Nama",
+        "quantity": 500,
+        "spec": "Art Carton 310gr, Matte Laminasi, Cetak 2 sisi",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK",
+        "note": "Nama dan nomor telepon berbeda untuk 5 orang.",
+        "unitPrice": 75000,
+        "total": 37500000
+      }
+    ],
+    "customerInfo": { "name": "CV. Sejahtera", "email": "cs@sejahtera.com", "phone": "+6282345678901" },
+    "subtotal": 45500000,
+    "tax": 5005000,
+    "shippingCost": 150000,
+    "total": 50655000
+  },
+  {
+    "id": "QT-003",
+    "userId": 1,
+    "date": "2025-06-01",
+    "validUntil": "2025-07-01",
+    "status": "draft",
+    "items": [
+      {
+        "productId": 5,
+        "name": "Banner Grand Opening",
+        "category": "Banner Vinyl",
+        "quantity": 20,
+        "spec": "Vinyl 510gr, 1 x 3 meter, Finishing lubang mata ayam",
+        "artwork": "Revisi minor dari file pelanggan",
+        "printResult": "Outdoor standard",
+        "note": "Dipasang untuk area depan toko.",
+        "unitPrice": 35000,
+        "total": 700000
+      }
+    ],
+    "customerInfo": { "name": "UD. Berkah", "email": "ud.berkah@gmail.com", "phone": "+6283456789012" },
+    "subtotal": 700000,
+    "tax": 77000,
+    "shippingCost": 50000,
+    "total": 827000
+  },
+  {
+    "id": "QT-004",
+    "userId": 1,
+    "date": "2025-06-12",
+    "validUntil": "2025-07-12",
+    "status": "accepted, ordered",
+    "items": [
+      {
+        "productId": 7,
+        "name": "Kalender Meja 2026",
+        "category": "Kalender",
+        "quantity": 300,
+        "spec": "Ukuran 21 x 15 cm, 13 lembar, Spiral, Art Carton 260gr",
+        "artwork": "Desain dibantu tim Dulank",
+        "printResult": "Warna Standard CMYK",
+        "note": "Logo perusahaan ditempatkan di setiap halaman.",
+        "unitPrice": 27500,
+        "total": 8250000
+      }
+    ],
+    "customerInfo": { "name": "PT. Sentosa Digital", "email": "procurement@sentosadigital.id", "phone": "+6281122233344" },
+    "subtotal": 8250000,
+    "tax": 907500,
+    "shippingCost": 100000,
+    "total": 9257500
+  },
+  {
+    "id": "QT-005",
+    "userId": 1,
+    "date": "2025-06-18",
+    "validUntil": "2025-07-18",
+    "status": "sent",
+    "items": [
+      {
+        "productId": 8,
+        "name": "Packaging Box Produk",
+        "category": "Kemasan",
+        "quantity": 2000,
+        "spec": "Ivory 350gr, Pond custom, Laminasi doff, Hotprint gold",
+        "artwork": "Ada file ready to print",
+        "printResult": "Warna Standard CMYK + Foil",
+        "note": "Dibutuhkan sample dummy sebelum produksi.",
+        "unitPrice": 6200,
+        "total": 12400000
+      }
+    ],
+    "customerInfo": { "name": "Brand Lokal Nusantara", "email": "hello@brandlokal.id", "phone": "+6287788899900" },
+    "subtotal": 12400000,
+    "tax": 1364000,
+    "shippingCost": 175000,
+    "total": 13939000
+  }
+]
