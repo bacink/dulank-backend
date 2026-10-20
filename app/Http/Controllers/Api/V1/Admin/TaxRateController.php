@@ -25,11 +25,17 @@ class TaxRateController extends Controller
             'name' => $rate->name,
             'rate' => (float) $rate->rate,
             'status' => $rate->status,
+            'createdOn' => $rate->created_at?->format('d M Y') ?? date('d M Y'),
         ]));
     }
 
     public function store(Request $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $taxRate = TaxRate::query()->findOrFail($id);
+            return $this->update($request, $taxRate);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'rate' => ['required', 'numeric', 'min:0', 'max:100'],

@@ -105,6 +105,11 @@ class PeopleController extends Controller
 
     public function storeCustomerType(Request $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $customerType = CustomerType::query()->findOrFail($id);
+            return $this->updateCustomerType($request, $customerType);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],

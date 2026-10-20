@@ -470,14 +470,17 @@ Route::prefix('admin')->group(function (): void {
         Route::middleware('permission:peoples.manage')->group(function (): void {
             Route::get('provinces', [RegionController::class, 'provinces']);
             Route::post('provinces', [RegionController::class, 'storeProvince']);
+            Route::put('provinces/{province}', [RegionController::class, 'updateProvince']);
             Route::delete('provinces/{province}', [RegionController::class, 'destroyProvince']);
 
             Route::get('regencies', [RegionController::class, 'regencies']);
             Route::post('regencies', [RegionController::class, 'storeRegency']);
+            Route::put('regencies/{regency}', [RegionController::class, 'updateRegency']);
             Route::delete('regencies/{regency}', [RegionController::class, 'destroyRegency']);
 
             Route::get('districts', [RegionController::class, 'districts']);
             Route::post('districts', [RegionController::class, 'storeDistrict']);
+            Route::put('districts/{district}', [RegionController::class, 'updateDistrict']);
             Route::delete('districts/{district}', [RegionController::class, 'destroyDistrict']);
         });
 

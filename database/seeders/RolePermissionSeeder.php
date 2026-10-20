@@ -10,7 +10,7 @@ use Spatie\Permission\PermissionRegistrar;
 class RolePermissionSeeder extends Seeder
 {
     /**
-     * Permission dasar (matrix lengkap menyusul di Fase 3).
+     * Matriks permission lengkap seluruh modul Dulank Admin.
      *
      * @var array<int, string>
      */
@@ -34,14 +34,81 @@ class RolePermissionSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $superAdmin = Role::query()->firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
-        $admin = Role::query()->firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-
         foreach ($this->permissions as $permission) {
-            Permission::query()->firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+            Permission::query()->firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web']
+            );
         }
 
-        $admin->syncPermissions($this->permissions);
-        $superAdmin->syncPermissions($this->permissions);
+        $rolesData = [
+            [
+                'name' => 'super-admin',
+                'description' => 'Super Administrator dengan hak akses tertinggi ke seluruh fitur dan pengaturan sistem.',
+                'permissions' => $this->permissions,
+            ],
+            [
+                'name' => 'admin',
+                'description' => 'Administrator Toko pengelola operasional umum, katalog, pesanan, dan pelanggan.',
+                'permissions' => $this->permissions,
+            ],
+            [
+                'name' => 'cashier',
+                'description' => 'Kasir POS bertugas memproses transaksi kasir, input order langsung, dan cetak struk pembayaran.',
+                'permissions' => [
+                    'dashboard.view',
+                    'sales.manage',
+                    'orders.manage',
+                    'peoples.manage',
+                ],
+            ],
+            [
+                'name' => 'operator',
+                'description' => 'Operator Produksi bertugas mengeksekusi SPK pengerjaan cetak/finishing dan update progres kerja.',
+                'permissions' => [
+                    'dashboard.view',
+                    'workflow.manage',
+                    'orders.manage',
+                ],
+            ],
+            [
+                'name' => 'designer',
+                'description' => 'Desainer Grafis bertugas setting file cetak, pembuatan plat CTP, dan approval materi desain.',
+                'permissions' => [
+                    'dashboard.view',
+                    'workflow.manage',
+                    'content.manage',
+                ],
+            ],
+            [
+                'name' => 'finance',
+                'description' => 'Staf Keuangan mengelola penagihan invoice, kas masuk/keluar, pembayaran supplier, dan penggajian.',
+                'permissions' => [
+                    'dashboard.view',
+                    'finance.manage',
+                    'reports.view',
+                    'hrm.manage',
+                ],
+            ],
+            [
+                'name' => 'warehouse',
+                'description' => 'Staf Gudang & Logistik mengontrol stok bahan baku kertas, penerimaan barang PO, dan surat jalan.',
+                'permissions' => [
+                    'dashboard.view',
+                    'purchases.manage',
+                    'products.manage',
+                    'orders.manage',
+                ],
+            ],
+        ];
+
+        foreach ($rolesData as $roleInfo) {
+            $role = Role::query()->firstOrCreate(
+                ['name' => $roleInfo['name'], 'guard_name' => 'web'],
+                ['description' => $roleInfo['description']]
+            );
+
+            $role->forceFill(['description' => $roleInfo['description']])->save();
+            $role->syncPermissions($roleInfo['permissions']);
+        }
     }
 }

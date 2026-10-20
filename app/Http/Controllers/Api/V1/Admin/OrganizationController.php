@@ -31,6 +31,11 @@ class OrganizationController extends Controller
 
     public function storeDepartment(Request $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $department = Department::query()->findOrFail($id);
+            return $this->updateDepartment($request, $department);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
@@ -75,16 +80,23 @@ class OrganizationController extends Controller
             $query->where('name', 'like', '%'.$search.'%');
         }
 
-        return ApiResponse::success($query->orderBy('name')->get()->map(fn (Designation $designation) => [
+        return ApiResponse::success($query->with('employees:id,designation_id,name')->orderBy('name')->get()->map(fn (Designation $designation) => [
             'id' => (string) $designation->id,
             'name' => $designation->name,
             'status' => $designation->status,
-            'employeeCount' => $designation->employees_count,
+            'members' => $designation->employees->pluck('name')->all(),
+            'totalMembers' => (int) $designation->employees_count,
+            'createdOn' => $designation->created_at?->format('d M Y') ?? date('d M Y'),
         ]));
     }
 
     public function storeDesignation(Request $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $designation = Designation::query()->findOrFail($id);
+            return $this->updateDesignation($request, $designation);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],

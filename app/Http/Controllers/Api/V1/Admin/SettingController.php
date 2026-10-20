@@ -38,7 +38,7 @@ class SettingController extends Controller
             foreach ($values as $key => $value) {
                 Setting::query()->updateOrCreate(
                     ['group' => $group, 'key' => (string) $key],
-                    ['value' => $value, 'updated_by' => $request->user()->id],
+                    ['value' => $value, 'updated_by' => $request->user()?->id],
                 );
             }
         });
@@ -189,14 +189,17 @@ class SettingController extends Controller
 
     public function languages(): JsonResponse
     {
-        return ApiResponse::success(Language::query()->orderBy('name')->get()->map(fn (Language $language) => [
+        return ApiResponse::success(Language::query()->withCount('translations')->orderBy('name')->get()->map(fn (Language $language) => [
             'id' => (string) $language->id,
             'code' => $language->code,
             'name' => $language->name,
             'flag' => $language->flag,
-            'rtl' => $language->rtl,
+            'rtl' => (bool) $language->rtl,
+            'totalKeys' => (int) ($language->translations_count ?? 0),
+            'doneKeys' => (int) ($language->translations_count ?? 0),
             'progress' => (int) $language->progress,
-            'status' => $language->status,
+            'status' => strtolower($language->status),
+            'isDefault' => $language->code === 'id',
         ]));
     }
 

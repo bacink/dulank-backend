@@ -166,6 +166,11 @@ class CatalogMasterController extends Controller
 
     public function storeUnit(Request $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $unit = Unit::query()->findOrFail($id);
+            return $this->updateUnit($request, $unit);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'shortName' => ['sometimes', 'nullable', 'string', 'max:20'],

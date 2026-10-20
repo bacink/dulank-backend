@@ -25,6 +25,11 @@ class BankAccountController extends Controller
 
     public function storeType(Request $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $bankAccountType = BankAccountType::query()->findOrFail($id);
+            return $this->updateType($request, $bankAccountType);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
@@ -78,6 +83,11 @@ class BankAccountController extends Controller
 
     public function store(StoreBankAccountRequest $request): JsonResponse
     {
+        if ($id = $request->input('id')) {
+            $bankAccount = BankAccount::query()->findOrFail($id);
+            return $this->update($request, $bankAccount);
+        }
+
         $validated = $request->validated();
 
         $account = BankAccount::query()->create([

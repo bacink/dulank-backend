@@ -20,6 +20,15 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             TaxRateSeeder::class,
             RegionSeeder::class,
+            DistrictSeeder::class,
+            DepartmentSeeder::class,
+            DesignationSeeder::class,
+            UnitSeeder::class,
+            CustomerTypeSeeder::class,
+            BankAccountTypeSeeder::class,
+            BankAccountSeeder::class,
+            CustomFieldSeeder::class,
+            LanguageSeeder::class,
         ]);
     }
 }

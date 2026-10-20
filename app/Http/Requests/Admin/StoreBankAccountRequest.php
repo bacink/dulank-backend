@@ -17,6 +17,7 @@ class StoreBankAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => ['sometimes', 'nullable'],
             'branchId' => ['sometimes', 'nullable', 'integer', 'exists:stores,id'],
             'accountTypeId' => ['sometimes', 'nullable', 'integer', 'exists:bank_account_types,id'],
             'accountName' => ['required', 'string', 'max:255'],
