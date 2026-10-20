@@ -19,7 +19,7 @@
 | 5 | Bahasa dokumen | Indonesia (istilah teknis tetap Inggris) |
 | 6 | Struktur backend | **Satu aplikasi Laravel**, pemisahan logis store/admin (route, controller, resource, rate limit, audit trail), model/service/policy bersama |
 | 7 | Framework | Laravel 13 (PHP 8.3–8.5, rilis 17 Maret 2026), Pest, Pint |
-| 8 | Strategi ID | Primary key bigint surrogate + kolom kode bisnis (`code`/`no`/`*_no`); route model binding memakai kode; API Resource mengekspos `id = kode` selama frontend lama masih memakainya |
+| 8 | Strategi ID | Master memakai PK bigint, diekspos sebagai string ID numerik. Kode bisnis terpisah. Route transaksi lama yang memakai nomor dokumen tetap kompatibel; jangan menyamaratakan ID master dan nomor dokumen |
 | 9 | Uang | Disimpan sebagai integer rupiah murni (tanpa desimal, tanpa string berformat); format tampilan hanya di frontend |
 | 10 | Konflik merge `dulank-admin` | **Selesai**: resolusi commit `358e7e8` + `d8b1a40`, lalu normalisasi PascalCase & typecheck 0 error (2026-10-09) |
 
@@ -693,3 +693,87 @@ Lihat §2.1.
 
 - `dulank-store`: `AGENTS.md`, `CLAUDE.md`, `docs/ROUTES.md`, `docs/COMPONENTS.md`, `docs/MIGRATION.md`.
 - `dulank-admin`: `AGENTS.md` (bersih, versi panduan AI Indonesia), `docs/STRUCTURE.md`, `docs/BACKEND_READY_VERTICAL_SLICE.md`, `docs/CODEBASE_COMPLIANCE_AUDIT_2026-10-09.md`.
+
+
+## 14. Fondasi Data dan Kontrak Kanonik ? 20 Oktober 2026
+
+Bagian ini menjadi acuan tahap 1?2 untuk source aktif Laravel dan Nuxt; uraian mock/JSON sebelumnya merupakan riwayat. Implementasi transaksi lengkap tetap bertahap. Registry master, audit relasi, dan enum tersedia di `config/data_contracts.php`.
+
+### 14.1 Aturan lintas domain
+
+| Topik | Kontrak |
+| --- | --- |
+| Sumber utama | Database Laravel. State frontend hanya draft/cache, bukan penyimpanan domain alternatif. GET tidak membuat record domain. |
+| Identitas | ID master adalah PK bigint, response menggunakan string numerik. Input menerima ID numerik/string numerik melalui validasi integer + exists. `code`, `number`, `invoice_no` adalah identitas bisnis terpisah. Route dokumen lama tidak diganti pada tahap ini. |
+| Relasi dan label | Payload baru memakai `customerId`, `productId`, `categoryId`, `subCategoryId`, `unitId`, `storeId`/`branchId`, `employeeId`, dan `bankAccountId` sesuai domain. Nama hasil hidrasi bukan identitas. Subkategori harus sesuai kategori induk. |
+| Kompatibilitas | Endpoint lama yang menerima label tetap dipertahankan sementara. Pembuatan referensi dari label bukan standar bagi integrasi baru. Jangan melakukan backfill dengan menebak kesamaan nama. |
+| Uang | Integer rupiah murni, nonnegatif untuk harga/nilai transaksi. Mutasi saldo/piutang dapat bertanda sesuai jenis entry. Total dihitung server; format Rp hanya di UI. |
+| Kuantitas | Angka desimal sesuai presisi kolom, selalu terkait satuan. Konversi rim/lembar dan pemakaian bahan perlu model tersendiri di tahap persediaan. |
+| Status | Gunakan nilai enum domain, bukan satu enum untuk semua. Contoh master Active/Inactive, customer channel Online/Offline, channel order sesuai OrderChannel. Alias UI diterjemahkan di adapter, tidak disimpan campur. |
+| Waktu | Timestamp API ISO-8601 UTC; tanggal bisnis `YYYY-MM-DD`. Tanggal tampilan/operasional Indonesia ditangani eksplisit sesuai zona bisnis. |
+| Respons | `{success:true,data,meta?}`; error `{success:false,message,errors?}`. Pagination `meta.page`, `meta.limit`, `meta.total`. HTTP 201 create, 422 validasi, 401/403 akses, 404 tidak ditemukan. |
+| Riwayat transaksi | Simpan FK dan snapshot nama/alamat/spesifikasi/harga/tarif saat transaksi. Perubahan master tidak menghitung ulang transaksi historis. |
+| Penghapusan | Master yang sudah dipakai perlu dinonaktifkan/diarsipkan; penyelarasan endpoint delete lama dilakukan pada tahap domain terkait. Jangan menganggap semua delete lama sudah memenuhi aturan ini. |
+| Konfigurasi | `settings` menyimpan profil, preferensi, prefix, template, dan koneksi. Bahan, mesin, rekening, produk, pelanggan, serta karyawan merujuk tabel master. `tags` + `taggables` adalah sumber tag aktif; `blog_tags` merupakan struktur lama. |
+| Idempotensi | Seeder contoh dapat diulang tanpa update record yang ada. Idempotensi transaksi pembayaran/retur belum menjadi klaim tahap 2 dan harus diuji pada tahap transaksi. |
+
+### 14.2 Pemetaan sumber dan dependensi
+
+- Organisasi/identitas: `stores`, `users`, `user_admins`, tabel role/permission. Tidak membuat admin demo atau mengubah hak akses admin lama.
+- Wilayah: `provinces -> regencies -> districts`, dengan `postal_codes`. Alamat saat ini masih menyimpan label wilayah; migrasi referensi wilayah dilakukan tersendiri.
+- Pelanggan: `customer_types -> customers -> users/addresses`. Supplier memakai `suppliers` dan alamat polymorphic.
+- Katalog: `categories -> sub_categories`, `units`, `variants -> products/product_variants`, `product_specs`, `product_processes`.
+- Pembelian/bahan: `purchase_categories -> purchase_items`; kertas `paper_groups -> paper_types`, `paper_sizes`, `paper_prices`. Hubungan stok lintas katalog perlu tahap persediaan.
+- Produksi: mesin/jasa `machines`, `die_cutting_blades`, `workshop_services`; biaya `calculator_components`, `profit_tiers`; proses `flow_categories -> flow_names`, `flow_templates`, `products -> work_flows -> work_flow_steps`.
+- HR: `departments/designations -> employees -> employee_salaries -> employee_salary_allowances`. Job, payroll periode, kasbon dan insentif pekerjaan merupakan transaksi.
+- Keuangan: `stores + bank_account_types -> bank_accounts`; kategori income/expense dan tax rates. Bank settings publik harus menunjuk rekening operasional bila digunakan untuk menerima pembayaran; belum disatukan pada tahap ini.
+- Konten/promo/mitra: kategori blog/FAQ, `tags`, bahasa/custom field; `discount_plans`, `discounts`, `coupons`, `vouchers`; `partners` beserta listing/moderasi. Subscription adalah transaksi; paket subscription belum memiliki master khusus.
+- Laporan/dashboard adalah hasil agregasi transaksi, bukan dataset yang diisi melalui seeder master.
+
+### 14.3 Jenis produk dan harga ? sudah diimplementasikan
+
+`products.product_type` ditambah nullable tanpa mengubah data historis. `productType` berisi Single Product, Variable Product, Size Calculation, Minimum Qty or Price, Large Format, atau Offset Service Price. `priceType` tetap Fixed/Range/Calculator. Default masing-masing: Single -> Fixed, Variable -> Range, lainnya -> Calculator. `sellingType` tetap field terpisah.
+
+API admin menerima nilai jenis produk lama dalam `priceType` melalui adapter kompatibilitas. Payload baru mengirim dua field terpisah; filter katalog memakai `productType`. Response menambah `productType`; record lama dapat mengembalikan null sampai diklasifikasi berdasarkan bukti. Product editor tidak lagi mengirim stok, harga, dan varian warna contoh secara otomatis. Pemilihan subkategori dibatasi kategori induk dan validasi server menolak FK induk yang bertentangan. Duplikasi kode produk menghasilkan 422.
+
+### 14.4 Audit aktif dan cadangan
+
+- MySQL 8.4.3, database aktif `dulank`, 133 tabel. Sebelum perubahan terdapat 35 migration yang sudah dijalankan.
+- Backup lengkap schema/data/triggers/routines/events di `storage/app/private/backups/dulank-before-foundation-20261020-200246.sql`, 1.370.961 byte. SHA-256: `a41cc9569314a09927843a8bfa29bda1d8f3a7096a20ed18979581da9aaea88f`.
+- Backup dipulihkan ke database sementara; jumlah baris seluruh 133 tabel cocok; database sementara sudah dihapus. File backup mengandung data privat dan tidak masuk Git/public storage.
+- Audit agregat: `php artisan dulank:audit-data --json`; mode CI lebih ketat: `php artisan dulank:audit-data --strict`. Exit 1 untuk error; strict juga exit 1 bila ada warning. Audit tidak mengubah record aplikasi.
+- Pemeriksaan mencakup jumlah baris pasti seluruh tabel database aktif, master kosong, grup kunci duplikat (case/trim), FK yatim termasuk polymorphic, relasi belum diisi, enum invalid, nilai negatif, dan pending migration. Audit bukan sertifikasi akuntansi atau pembuktian seluruh perilaku API.
+- Snapshot lokal sebelum/sesudah ada di `storage/app/private/backups/audit-*-foundation.json`. Hash isi record lama diperiksa pada 127 tabel bisnis (tabel runtime/log/migration dikecualikan); tidak ada record lama yang berubah setelah migration/seeding.
+
+### 14.5 Seeder contoh
+
+Jalankan setelah migration: `php artisan db:seed --class=DemoMasterDataSeeder --no-interaction`. Seeder terpisah dari `DatabaseSeeder`; tidak memanggil ulang seeder lama yang memakai updateOrCreate. Hanya berjalan di local/testing dan seluruh proses dibungkus transaction.
+
+Dataset fiktif mencakup 2 cabang, 8 pelanggan beserta akun/alamat, 4 supplier/alamat, 6 karyawan beserta aturan gaji/tunjangan, 2 kas cabang, referensi keuangan/konten, 4 bahan kertas beserta ukuran/harga/barang pembelian, 5 mesin, 4 jasa produksi, 3 komponen biaya, margin bila belum ada, 8 produk, spesifikasi/proses produk, 2 varian, 4 proses, dan 2 workflow. Contoh promo dan mitra juga tersedia dalam kondisi nonaktif.
+
+Kode bisnis memakai `DEMO-*`, email memakai domain `.test`, deskripsi/label menjelaskan contoh. Provenance record yang dibuat seeder berada di `legacy_id_map` dengan `source=demo`; ini bukan impor store/admin. Record hasil seed yang diedit pengguna tidak ditimpa saat seed ulang. Akun pelanggan contoh nonaktif dengan password acak yang tidak dipublikasikan. Tidak ada akun admin demo, pesan terkirim, atau aktivasi integrasi. Tidak membuat invoice, order, payment, saldo awal, jurnal, stock masuk, maupun transaksi payroll.
+
+Harga, gaji dan margin hanya ilustrasi, bukan tarif usaha atau ketentuan upah/pajak. Data wilayah existing dipertahankan; seeder contoh tidak mengklaim melengkapi seluruh kecamatan Indonesia.
+
+### 14.6 Gap yang tetap terbuka
+
+Audit setelah seed: 0 error dan 14 kategori warning. Lima produk lama belum memiliki subkategori/satuan/cabang/jenis produk; satu pelanggan belum memiliki tipe; tujuh order belum memiliki customer/cabang; tiga invoice belum memiliki customer; lima rekening lama belum memiliki cabang. `user_admins` kosong meski akun admin/role existing tersedia. Struktur purchase line/PO/retur belum menunjuk purchase_item_id; varian produk belum memiliki variant_id. Data tersebut dipertahankan, bukan ditautkan berdasarkan tebakan.
+
+Masih diperlukan penyambungan transaksi berdasarkan ID, mutasi stok/konversi satuan, resep bahan, paket subscription, konfigurasi Full Color, bank settings, dan pengujian laporan. Nilai opening balance dari seeder rekening lama perlu dikonfirmasi terhadap saldo usaha; tidak diubah oleh seeder contoh.
+
+Status: audit dan fondasi kontrak tersedia; bukan klaim seluruh aplikasi siap produksi. Seluruh perubahan belum dikomit dan belum dipush.
+
+
+### Hasil validasi akhir fondasi ? 20 Oktober 2026
+
+- Backend Pest: PASS, 189 tests / 2.014 assertions; database pengujian SQLite terisolasi. Termasuk 22 kasus fondasi, API master, tipe produk/harga, validasi FK, idempotensi, preserve data pengguna, rollback, dan guard production.
+- Pint dirty: PASS. Frontend `npm.cmd run build`: PASS; `npm.cmd run typecheck`: PASS; `npm.cmd run validate:structure`: PASS (1.220 file, 0 failure). `git diff --check`: PASS kedua repositori. Script `test:sales` tidak tersedia.
+- Database lokal: 36 migration diterapkan, 133 tabel; audit ulang 0 error / 14 kategori warning; pengulangan seeder tidak mengubah jumlah record.
+- Verifikasi browser belum dijalankan: inventory computer-use pada sesi ini mengembalikan apps=[] dan browsers=[]. Tidak mengklaim tampilan/flow browser sudah verified.
+- Tahap 1 selesai untuk audit/cadangan; tahap 2 selesai untuk penetapan kontrak dan implementasi fondasi katalog yang disebutkan di atas. Penerapan kontrak pada seluruh transaksi tetap tahap domain selanjutnya.
+- Branch Rama; NOT COMMITTED / NOT PUSHED; tidak ada commit/push atau perubahan Git state.
+
+
+### Penghapusan data contoh atas permintaan pengguna ? 20 Oktober 2026
+
+175 record yang dibuat DemoMasterDataSeeder dan 175 pemetaan source=demo telah dihapus dari database lokal dalam satu transaksi. Snapshot sebelum penghapusan disimpan di storage/app/private/backups/before-remove-demo-20261020-203138.snapshot. Perbandingan hash seluruh 133 tabel membuktikan record selain target demo tidak berubah; sisa pemetaan demo nol. Master yang sudah ada sebelum seeder tetap dipertahankan. File seeder, migration product_type, dan implementasi kontrak tetap tersedia. Catatan seed sebelumnya adalah riwayat, bukan keadaan database saat ini. Tidak menjalankan ulang seeder. Branch Rama; NOT COMMITTED / NOT PUSHED. Validasi: integritas row sebelum/sesudah penghapusan, bukan perubahan kode; build/tes tidak diulang.

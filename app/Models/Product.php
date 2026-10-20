@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PriceType;
 use App\Enums\ProductStatus;
+use App\Enums\ProductType;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +32,7 @@ class Product extends Model
         'price_from',
         'price_to',
         'price_type',
+        'product_type',
         'selling_type',
         'quantity',
         'min_order_qty',
@@ -65,6 +67,7 @@ class Product extends Model
             'min_width' => 'float',
             'discount_value' => 'integer',
             'price_type' => PriceType::class,
+            'product_type' => ProductType::class,
             'status' => ProductStatus::class,
             'archived_at' => 'datetime',
         ];

@@ -103,3 +103,19 @@ php artisan route:list --path=api
 - ⏭️ Sisa: integrasi aktual payment gateway/SMS/email (konfigurasi & daftar gateway sudah tersedia via settings), worker queue produksi, dan **adaptasi frontend** (proxy `/api` + login UI store, adapter admin per modul)
 
 Catatan: endpoint milik user (cart/orders/tickets/dst.) memerlukan token `store`; halaman store yang belum punya login UI perlu dihubungkan pada sesi adaptasi frontend.
+
+
+## Fondasi data (20 Oktober 2026)
+
+Kontrak aktif, hasil audit, batas implementasi, dan lokasi backup ada di [PRD bagian 14](PRD.md#14-fondasi-data-dan-kontrak-kanonik--20-oktober-2026).
+
+```sh
+php artisan migrate --no-interaction
+php artisan dulank:audit-data --json
+php artisan db:seed --class=DemoMasterDataSeeder --no-interaction
+php artisan dulank:audit-data --json
+```
+
+Seeder contoh hanya local/testing, terpisah dari seeder instalasi, idempoten, dan tidak menimpa record existing. Tidak membuat transaksi maupun saldo/stok awal. Jangan memakai `migrate:fresh`, truncate, atau menjalankan ulang seluruh seeder lama pada database operasional untuk mengisi contoh.
+
+Laporan audit menyajikan agregat tanpa identitas pribadi. Exit 1 berarti ada error; opsi `--strict` juga gagal pada warning. Hasil audit bersih tidak menggantikan uji alur transaksi dan rekonsiliasi keuangan.

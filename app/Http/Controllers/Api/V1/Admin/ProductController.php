@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Enums\ProductType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminIndexRequest;
 use App\Models\Category;
@@ -11,11 +12,14 @@ use App\Models\SubCategory;
 use App\Models\Unit;
 use App\Support\ApiResponse;
 use App\Support\DocumentNumber;
+use App\Support\ProductPricingContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -31,6 +35,11 @@ class ProductController extends Controller
         $category = trim((string) $request->input('category', ''));
         if ($category !== '') {
             $query->whereHas('category', fn (Builder $query) => $query->where('name', $category));
+        }
+
+        $productType = $request->input('productType', $request->input('priceType'));
+        if (is_string($productType) && ProductType::tryFrom($productType) !== null) {
+            $query->where('product_type', $productType);
         }
 
         $search = trim((string) $request->input('search', ''));
@@ -109,8 +118,18 @@ class ProductController extends Controller
      */
     private function validatePayload(Request $request): array
     {
+        // Compatibility for existing admin clients that put the product kind in priceType.
+        $legacyType = is_string($request->input('priceType')) ? ProductType::tryFrom($request->input('priceType')) : null;
+        if ($legacyType !== null) {
+            if ($request->filled('productType') && $request->input('productType') !== $legacyType->value) {
+                throw ValidationException::withMessages(['productType' => ['Product type conflicts with the legacy priceType.']]);
+            }
+            $request->merge(['productType' => $legacyType->value, 'priceType' => ProductPricingContract::defaultPriceType($legacyType)->value]);
+        }
+
         return $request->validate([
-            'code' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'productType' => ['sometimes', 'nullable', Rule::enum(ProductType::class)],
+            'code' => ['sometimes', 'nullable', 'string', 'max:60', Rule::unique('products', 'code')->ignore($request->route('product'))],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['sometimes', 'nullable', 'string', 'max:255'],
             'category' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -153,18 +172,31 @@ class ProductController extends Controller
      */
     private function attributes(Request $request, array $validated, ?Product $product): array
     {
+        $categoryId = $validated['categoryId'] ?? $this->categoryId($validated['category'] ?? null) ?? $product?->category_id;
+        $subCategoryId = $validated['subCategoryId'] ?? $this->subCategoryId($validated['subCategory'] ?? null, $categoryId) ?? $product?->sub_category_id;
+        if ($subCategoryId !== null) {
+            $parentId = SubCategory::query()->findOrFail($subCategoryId)->category_id;
+            if ($categoryId !== null && (int) $categoryId !== (int) $parentId) {
+                throw ValidationException::withMessages(['subCategoryId' => ['Subcategory must belong to the selected category.']]);
+            }
+            $categoryId ??= $parentId;
+        }
+        $type = isset($validated['productType']) ? ProductType::from($validated['productType']) : $product?->product_type;
+        $type ??= ! empty($validated['variants']) ? ProductType::Variable : ProductType::Single;
+
         return [
             'code' => $validated['code'] ?? $product?->code ?? DocumentNumber::next('product', Product::query(), 'code', 5),
             'slug' => $this->uniqueSlug($validated['slug'] ?? $validated['name'], $product?->id),
             'name' => $validated['name'],
-            'category_id' => $validated['categoryId'] ?? $this->categoryId($validated['category'] ?? null) ?? $product?->category_id,
-            'sub_category_id' => $validated['subCategoryId'] ?? $this->subCategoryId($validated['subCategory'] ?? null, $validated['categoryId'] ?? null) ?? $product?->sub_category_id,
+            'category_id' => $categoryId,
+            'sub_category_id' => $subCategoryId,
             'unit_id' => $validated['unitId'] ?? $this->unitId($validated['unit'] ?? null) ?? $product?->unit_id,
             'store_id' => $validated['storeId'] ?? $this->storeId($validated['store'] ?? null) ?? $product?->store_id,
             'description' => $validated['description'] ?? null,
             'price' => (int) ($validated['price'] ?? $product?->price ?? 0),
-            'price_type' => $validated['priceType'] ?? $product?->price_type?->value ?? 'Fixed',
-            'selling_type' => $validated['sellingType'] ?? null,
+            'price_type' => $validated['priceType'] ?? $product?->price_type?->value ?? ProductPricingContract::defaultPriceType($type)->value,
+            'product_type' => $type->value,
+            'selling_type' => $validated['sellingType'] ?? $product?->selling_type,
             'quantity' => (float) ($validated['quantity'] ?? $product?->quantity ?? 0),
             'min_order_qty' => isset($validated['minOrderQty']) ? (float) $validated['minOrderQty'] : $product?->min_order_qty,
             'quantity_alert' => isset($validated['quantityAlert']) ? (float) $validated['quantityAlert'] : $product?->quantity_alert,
@@ -213,10 +245,11 @@ class ProductController extends Controller
             return null;
         }
 
-        return SubCategory::query()->firstOrCreate(
-            ['name' => trim($name)],
-            ['category_id' => $categoryId ?? $this->categoryId('Umum')],
-        )->id;
+        if ($categoryId === null) {
+            throw ValidationException::withMessages(['categoryId' => ['A category is required when creating a subcategory by name.']]);
+        }
+
+        return SubCategory::query()->firstOrCreate(['category_id' => $categoryId, 'name' => trim($name)])->id;
     }
 
     private function unitId(?string $name): ?int
@@ -310,6 +343,7 @@ class ProductController extends Controller
             'store' => $product->store?->store_name,
             'price' => (int) $product->price,
             'priceType' => $product->price_type?->value,
+            'productType' => $product->product_type?->value,
             'sellingType' => $product->selling_type,
             'description' => $product->description,
             'quantity' => (float) $product->quantity,
