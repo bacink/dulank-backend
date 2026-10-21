@@ -13,7 +13,7 @@ class District extends Model
     /** @use HasFactory<DistrictFactory> */
     use HasFactory;
 
-    protected $fillable = ['regency_id', 'code', 'name', 'postal_code'];
+    protected $fillable = ['status', 'regency_id', 'code', 'name', 'postal_code'];
 
     /**
      * @return BelongsTo<Regency, $this>

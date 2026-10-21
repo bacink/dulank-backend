@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AssignRolesRequest;
 use App\Http\Requests\Admin\StoreRoleRequest;
 use App\Http\Requests\Admin\UpdateRoleRequest;
 use App\Models\User;
+use App\Models\UserAdmin;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Permission;
@@ -50,6 +51,7 @@ class RoleController extends Controller
 
     public function update(UpdateRoleRequest $request, Role $role): JsonResponse
     {
+        abort_if($role->name === 'super-admin', 422, 'Role utama tidak dapat diubah melalui editor.');
         $role->forceFill([
             'name' => $request->string('name')->toString(),
             'description' => $request->input('description'),
@@ -68,6 +70,9 @@ class RoleController extends Controller
             return ApiResponse::error('Role super-admin tidak dapat dihapus.', 422);
         }
 
+        if ($role->users()->exists()) {
+            return ApiResponse::error('Role masih digunakan oleh pengguna.', 409);
+        }
         $role->delete();
 
         return ApiResponse::success(['id' => (string) $role->id, 'removed' => true]);
@@ -89,7 +94,11 @@ class RoleController extends Controller
     public function assignToUser(AssignRolesRequest $request, string $id): JsonResponse
     {
         $user = User::query()->findOrFail((int) $id);
+        abort_unless($user->isAdmin(), 422, 'Role admin hanya untuk akun admin.');
+        abort_if($user->id === $request->user()->id, 422, 'Tidak dapat mengganti role sendiri.');
+        abort_if(($user->hasRole('super-admin') || in_array('super-admin', $request->input('roles', []), true)) && ! $request->user()->hasRole('super-admin'), 403);
         $user->syncRoles($request->input('roles', []));
+        UserAdmin::query()->where('user_id', $user->id)->update(['role' => $request->input('roles.0', '')]);
 
         return ApiResponse::success([
             'userId' => (string) $user->id,

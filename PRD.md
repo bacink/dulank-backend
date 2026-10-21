@@ -777,3 +777,39 @@ Status: audit dan fondasi kontrak tersedia; bukan klaim seluruh aplikasi siap pr
 ### Penghapusan data contoh atas permintaan pengguna ? 20 Oktober 2026
 
 175 record yang dibuat DemoMasterDataSeeder dan 175 pemetaan source=demo telah dihapus dari database lokal dalam satu transaksi. Snapshot sebelum penghapusan disimpan di storage/app/private/backups/before-remove-demo-20261020-203138.snapshot. Perbandingan hash seluruh 133 tabel membuktikan record selain target demo tidak berubah; sisa pemetaan demo nol. Master yang sudah ada sebelum seeder tetap dipertahankan. File seeder, migration product_type, dan implementasi kontrak tetap tersedia. Catatan seed sebelumnya adalah riwayat, bukan keadaan database saat ini. Tidak menjalankan ulang seeder. Branch Rama; NOT COMMITTED / NOT PUSHED. Validasi: integritas row sebelum/sesudah penghapusan, bukan perubahan kode; build/tes tidak diulang.
+
+
+## 15. Tahap 3?5: identitas, referensi, dan relasi pihak ? 20 Oktober 2026
+
+### Cakupan implementasi
+
+| Tahap | Implementasi aktif | Evidence source |
+| --- | --- | --- |
+| 3 | Login admin aktif, sinkronisasi role Spatie dan profil User Admin, password awal wajib, cabang berupa ID valid, proteksi akun/role super-admin dan akun sendiri; profil perusahaan kompatibel format seeder; ganti password, reset password token, TOTP dengan konfirmasi; session dan aktivitas akun nyata | `EnsureActiveAdmin`, `BranchAccess`, `UserManagementController`, `RoleController`, `AdminProfileController`, `AccountSecurityController`, `PasswordRecoveryController`, `SettingController` |
+| 4 | Validasi nama/kode master yang dinormalisasi, hierarki wilayah berdasarkan ID, status kabupaten/kecamatan persisten, daftar kode pos, kategori/subkategori, satuan/varian, tipe pelanggan, departemen/jabatan, kategori keuangan, tipe rekening/pajak; proteksi hapus master yang direferensikan; validasi prefix dan satu mata uang default aktif | `config/master_integrity.php`, `ValidateMasterData`, `MasterDataService`, `RegionController`, `CatalogMasterController`, `SettingController` |
+| 5 | Pelanggan memakai tipe ID dan akun unik (tidak mengambil alih email existing), asal pelanggan admin Offline; pemilik alamat dan rantai wilayah valid; supplier/mitra terproteksi saat dipakai; karyawan memakai departemen/jabatan/akun ID, dua kontak darurat, edit record existing; rekening memakai cabang dan tipe valid, nomor rekening unik, opening balance tidak dapat diganti setelah ledger terisi | `PeopleController`, `EmployeeController`, `SupplierController`, `CalculatorController`, `BankAccountController`, `StoreBankAccountRequest` |
+
+Frontend memakai pilihan role/cabang/manager dari `/master-options`; tidak lagi pilihan Toko 1/Toko 2. Karyawan memakai departemen dan wilayah database, tambah/edit satu editor, serta upload foto melalui API. Email/telepon profil dan keamanan disimpan ke akun aktual; toggle 2FA mengikuti secret terkonfirmasi, bukan boolean konfigurasi bersama. Login menerima kode autentikator. Forgot/reset password memanggil broker Laravel; URL notifikasi mengikuti `DULANK_ADMIN_URL` dan `DULANK_STORE_URL`.
+
+### Migrasi dan perlindungan data
+
+Migration `2026_10_20_204720_add_reference_fields_for_admin_foundation.php` sudah diterapkan di MySQL lokal (37 migration). Tambahan: `users.password_changed_at`, `user_admins.all_stores`, status wilayah, tiga FK alamat nullable, dan kontak darurat kedua karyawan. Relasi alamat lama tidak ditebak/backfill otomatis.
+
+Backup penuh: `storage/app/private/backups/before-stages-3-5-20261020-210307.sql`, SHA-256 `363b65df113b3016424bf5db37283c262932f27b034eef25e4344e2a00f6ca9e`. Backup berhasil direstore ke database sementara; perbandingan hash seluruh kolom lama pada 132 tabel non-migration dan 12.319 baris cocok seluruhnya, lalu database verifikasi dihapus. Tidak menjalankan seeder, tidak membuat akun/transaksi contoh, tidak mengirim email sungguhan. Percobaan snapshot tambahan melalui Schema::getTables tidak menghasilkan snapshot karena inventory lintas schema; bukti final memakai restore backup dan information_schema dengan filter schema yang tepat.
+
+### Validasi dan batas klaim
+
+- Pest penuh PASS: 208 tests / 2.098 assertions di SQLite terisolasi; termasuk 19 kasus tahap 3?5. Pint dirty PASS. Build produksi, typecheck, dan validator struktur Nuxt PASS untuk perubahan terkait; final rerun dicatat pada changelog admin. Script test:sales tidak tersedia.
+- Audit MySQL sesudah migrasi: 133 tabel, 0 error, 40 kategori warning. Warning mencakup master kosong setelah penghapusan demo, relasi lama belum diisi, serta gap transaksi tahap berikutnya. Nilai/relasi lama dipertahankan.
+- Branch scope otomatis baru berlaku pada Store dan BankAccount. Super-admin mempunyai akses global; non-super tanpa profil/penugasan cabang tidak mendapat cabang. all_stores harus diberikan secara eksplisit di internal database; API User Admin tidak menerima grant tersebut. Pembatasan seluruh transaksi/laporan berdasarkan cabang belum menjadi klaim tahap ini.
+- Email reset diuji dengan Notification fake; pengiriman SMTP produksi dan URL deployment aktual perlu konfigurasi. Belum ada recovery code TOTP atau UI revoke sesi (endpoint revoke tersedia). Riwayat perangkat memakai token Sanctum; data IP/browser lama yang tidak tersedia tidak direka.
+- Karyawan dan akun login merupakan entitas berbeda. Form menghubungkan akun admin yang sudah dibuat; password/hak akses dikelola di User Admin. Photo ID sekarang mengikuti penyimpanan media public existing; akses dokumen identitas privat memerlukan perubahan kebijakan penyimpanan tersendiri sebelum menyimpan dokumen sensitif produksi.
+- Belum dilakukan uji browser desktop/mobile/reload karena inventory browser tidak tersedia. Status: implemented, API tested; browser verification pending. Tidak menyatakan seluruh website siap produksi, BRVS penuh, atau approved baseline. Kaitan transaksi/stock/pembayaran, penomoran konkurensi, kelengkapan data nyata, dan penyatuan bank settings publik tetap pekerjaan berikutnya.
+- Branch Rama; NOT COMMITTED / NOT PUSHED. Tidak ada operasi Git mutating.
+
+
+### Verifikasi lanjutan ? 21 Oktober 2026
+
+Endpoint read-only location-options menyediakan provinsi/kabupaten/kecamatan aktif untuk form karyawan tanpa memberi hak mutasi wilayah. Pilihan manager dapat dibaca HR. Subkategori sekarang hanya menerima ID atau label kategori existing yang unik setelah trim/case; label salah tidak membuat master baru. Frontend edit karyawan membaca detail by ID (bebas pagination), menahan simpan sebelum load sukses, tanggal add memakai ISO date, dan mata uang menjaga submit bersamaan/ID edit yang tidak ada.
+
+Validasi: full Pest 211 tests / 2.111 assertions PASS; setelah perubahan resolver terakhir, foundation + catalog 26 tests / 147 assertions PASS. Pint PASS. Nuxt typecheck/build/structure/diff PASS. Browser inventory dicek ulang kosong; audit MySQL hari ini gagal koneksi ditolak 127.0.0.1:3306. Hasil restore backup, 37 migration, dan audit 0 error/40 warning pada bagian sebelumnya adalah evidence 20 Oktober, tidak diklaim diulang hari ini. Tidak menjalankan seeder/migration lagi, tidak mengubah akun riil, tidak mengirim email. SMTP, browser/reload, dan scope transaksi cabang menyeluruh tetap belum diverifikasi/diselesaikan. Branch Rama; NOT COMMITTED / NOT PUSHED.

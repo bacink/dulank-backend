@@ -12,6 +12,7 @@ use App\Models\PartnerMetric;
 use App\Models\ProfitTier;
 use App\Models\RequestQuotation;
 use App\Models\User;
+use App\Services\MasterDataService;
 use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -196,6 +197,7 @@ class CalculatorController extends Controller
 
     public function destroyPartner(Partner $partner): JsonResponse
     {
+        MasterDataService::assertDeletable($partner);
         $partner->delete();
 
         return ApiResponse::success(['id' => (string) $partner->id, 'removed' => true]);

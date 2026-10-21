@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBankAccountRequest extends FormRequest
 {
@@ -22,7 +23,7 @@ class StoreBankAccountRequest extends FormRequest
             'accountTypeId' => ['sometimes', 'nullable', 'integer', 'exists:bank_account_types,id'],
             'accountName' => ['required', 'string', 'max:255'],
             'bankName' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'accountNo' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'accountNo' => ['sometimes', 'nullable', 'string', 'max:60', Rule::unique('bank_accounts', 'account_no')->ignore($this->route('bankAccount')?->id ?? $this->input('id'))],
             'openingBalance' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'ifsc' => ['sometimes', 'nullable', 'string', 'max:60'],
             'description' => ['sometimes', 'nullable', 'string', 'max:500'],

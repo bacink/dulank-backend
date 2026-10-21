@@ -10,23 +10,46 @@ use App\Models\Address;
 use App\Models\Customer;
 use App\Models\CustomerAccountEntry;
 use App\Models\CustomerType;
+use App\Models\District;
 use App\Models\PostalCode;
+use App\Models\Province;
+use App\Models\Regency;
 use App\Models\Store;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\MasterDataService;
 use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 /**
  * Peoples: customers, customer-types, stores, addresses.
  */
 class PeopleController extends Controller
 {
+    public function options(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = ['stores' => Store::query()->orderBy('store_name')->get(['id', 'store_name', 'status'])];
+        if ($user->can('users.manage') || $user->can('peoples.manage') || $user->can('hrm.manage')) {
+            $data['managers'] = User::query()->where('type', 'admin')->where('status', 'Active')->orderBy('name')->get(['id', 'name']);
+        }
+        if ($user->can('users.manage')) {
+            $data['roles'] = Role::query()->where('guard_name', 'web')->when(! $user->hasRole('super-admin'), fn ($query) => $query->where('name', '!=', 'super-admin'))->orderBy('name')->get(['id', 'name']);
+        }
+
+        return ApiResponse::success($data);
+    }
+
     public function customers(AdminIndexRequest $request): JsonResponse
     {
-        $query = Customer::query()->with('user');
+        $query = Customer::query()->with(['user', 'customerType']);
 
         $type = trim((string) $request->input('type', ''));
         if ($type !== '') {
@@ -65,7 +88,7 @@ class PeopleController extends Controller
     {
         $validated = $this->validateCustomer($request);
 
-        $customer = $this->saveCustomer($validated, null, $request);
+        $customer = DB::transaction(fn () => $this->saveCustomer($validated, null, $request));
 
         return ApiResponse::success($this->customerPayload($customer->load('user')), [], 201);
     }
@@ -74,13 +97,14 @@ class PeopleController extends Controller
     {
         $validated = $this->validateCustomer($request);
 
-        $customer = $this->saveCustomer($validated, $customer, $request);
+        $customer = DB::transaction(fn () => $this->saveCustomer($validated, $customer, $request));
 
         return ApiResponse::success($this->customerPayload($customer->refresh()->load('user')));
     }
 
     public function destroyCustomer(Customer $customer): JsonResponse
     {
+        MasterDataService::assertDeletable($customer);
         $customer->delete();
 
         return ApiResponse::success(['id' => (string) $customer->id, 'removed' => true]);
@@ -107,6 +131,7 @@ class PeopleController extends Controller
     {
         if ($id = $request->input('id')) {
             $customerType = CustomerType::query()->findOrFail($id);
+
             return $this->updateCustomerType($request, $customerType);
         }
 
@@ -158,6 +183,7 @@ class PeopleController extends Controller
             'id' => (string) $store->id,
             'storeName' => $store->store_name,
             'userName' => $store->manager?->name,
+            'managerId' => $store->user_id !== null ? (string) $store->user_id : null,
             'address' => $store->address,
             'phone' => $store->phone,
             'email' => $store->email,
@@ -185,6 +211,7 @@ class PeopleController extends Controller
 
     public function destroyStore(Store $store): JsonResponse
     {
+        MasterDataService::assertDeletable($store);
         $store->delete();
 
         return ApiResponse::success(['id' => (string) $store->id, 'removed' => true]);
@@ -262,10 +289,15 @@ class PeopleController extends Controller
      */
     private function validateCustomer(Request $request): array
     {
+        if ($request->filled('email')) {
+            $request->merge(['email' => mb_strtolower(trim($request->input('email')))]);
+        }
+
         return $request->validate([
-            'customerId' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'customerId' => ['sometimes', 'nullable', 'string', 'max:40', Rule::unique('customers', 'code')->ignore($request->route('customer'))],
+            'customerTypeId' => ['sometimes', 'nullable', 'integer', 'exists:customer_types,id'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->route('customer')?->user_id)],
             'type' => ['sometimes', 'nullable', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'channel' => ['sometimes', 'nullable', 'string', 'max:40'],
@@ -280,14 +312,13 @@ class PeopleController extends Controller
     private function saveCustomer(array $validated, ?Customer $customer, Request $request): Customer
     {
         $user = $customer?->user
-            ?? User::query()->where('email', $validated['email'])->first()
             ?? new User;
 
         if (! $user->exists) {
             $user->forceFill([
                 'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => 'password',
+                'email' => mb_strtolower($validated['email']),
+                'password' => Str::random(64),
                 'type' => AccountType::Store,
                 'join_date' => now(),
                 'status' => 'Active',
@@ -296,13 +327,13 @@ class PeopleController extends Controller
 
         $user->forceFill([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => mb_strtolower($validated['email']),
             'phone' => $validated['phone'] ?? $user->phone,
             'status' => ($validated['status'] ?? 'Active') === 'Active' ? 'Active' : 'Inactive',
         ])->save();
 
-        $type = null;
-        if (! empty($validated['type'])) {
+        $type = isset($validated['customerTypeId']) ? CustomerType::query()->findOrFail($validated['customerTypeId']) : null;
+        if ($type === null && ! empty($validated['type'])) {
             $type = CustomerType::query()->firstOrCreate(['name' => $validated['type']]);
         }
 
@@ -310,9 +341,7 @@ class PeopleController extends Controller
             'user_id' => $user->id,
             'code' => $validated['customerId'] ?? $customer?->code ?? 'CUS-'.str_pad((string) $user->id, 6, '0', STR_PAD_LEFT),
             'customer_type_id' => $type?->id ?? $customer?->customer_type_id,
-            'channel' => strtolower((string) ($validated['channel'] ?? 'Online')) === 'offline'
-                ? CustomerChannel::Offline
-                : CustomerChannel::Online,
+            'channel' => $customer?->channel ?? CustomerChannel::Offline,
             'date_join' => $request->date('dateJoin')?->toDateString() ?? $customer?->date_join?->toDateString() ?? now()->toDateString(),
             'last_seen' => now()->toDateString(),
         ];
@@ -341,6 +370,7 @@ class PeopleController extends Controller
             'name' => $customer->user?->name,
             'email' => $customer->user?->email,
             'type' => $customer->customerType?->name,
+            'customerTypeId' => $customer->customer_type_id !== null ? (string) $customer->customer_type_id : null,
             'phone' => $customer->user?->phone,
             'channel' => $customer->channel?->value,
             'dateJoin' => $customer->date_join?->format('d/m/Y, H:i'),
@@ -358,6 +388,7 @@ class PeopleController extends Controller
         return $request->validate([
             'storeName' => ['required', 'string', 'max:255'],
             'userName' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'managerId' => ['sometimes', 'nullable', 'integer', Rule::exists('users', 'id')->where('type', 'admin')->where('status', 'Active')],
             'address' => ['sometimes', 'nullable', 'string', 'max:500'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
@@ -371,9 +402,9 @@ class PeopleController extends Controller
      */
     private function storeAttributes(array $validated, ?Store $store): array
     {
-        $managerId = $store?->user_id;
-        if (! empty($validated['userName'])) {
-            $managerId = User::query()->where('name', $validated['userName'])->value('id') ?? $managerId;
+        $managerId = array_key_exists('managerId', $validated) ? $validated['managerId'] : $store?->user_id;
+        if (! array_key_exists('managerId', $validated) && ! empty($validated['userName'])) {
+            $managerId = MasterDataService::resolve(User::class, null, $validated['userName'], 'managerId', ['type' => 'admin', 'status' => 'Active']);
         }
 
         return [
@@ -393,7 +424,10 @@ class PeopleController extends Controller
     {
         return $request->validate([
             'ownerType' => ['required', 'in:customer,supplier'],
-            'ownerId' => ['required', 'integer'],
+            'ownerId' => ['required', 'integer', Rule::exists($request->input('ownerType') === 'supplier' ? 'suppliers' : 'customers', 'id')],
+            'provinceId' => ['sometimes', 'nullable', 'integer', 'exists:provinces,id'],
+            'regencyId' => ['sometimes', 'nullable', 'integer', 'exists:regencies,id'],
+            'districtId' => ['sometimes', 'nullable', 'integer', 'exists:districts,id'],
             'name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'contact' => ['sometimes', 'nullable', 'string', 'max:30'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
@@ -415,7 +449,27 @@ class PeopleController extends Controller
      */
     private function addressAttributes(array $validated): array
     {
+        $provinceId = $validated['provinceId'] ?? null;
+        $regencyId = $validated['regencyId'] ?? null;
+        $districtId = $validated['districtId'] ?? null;
+        $district = $districtId ? District::query()->with('regency')->findOrFail($districtId) : null;
+        if ($district) {
+            if ($regencyId && (int) $regencyId !== $district->regency_id) {
+                throw ValidationException::withMessages(['districtId' => ['Kecamatan tidak sesuai kabupaten/kota.']]);
+            }
+            $regencyId = $district->regency_id;
+        }
+        $regency = $regencyId ? Regency::query()->findOrFail($regencyId) : null;
+        if ($regency) {
+            if ($provinceId && (int) $provinceId !== $regency->province_id) {
+                throw ValidationException::withMessages(['regencyId' => ['Kabupaten/kota tidak sesuai provinsi.']]);
+            }
+            $provinceId = $regency->province_id;
+        }
+        $province = $provinceId ? Province::query()->findOrFail($provinceId) : null;
+
         return [
+            'province_id' => $provinceId, 'regency_id' => $regencyId, 'district_id' => $districtId,
             'addressable_type' => $validated['ownerType'] === 'supplier' ? Supplier::class : Customer::class,
             'addressable_id' => (int) $validated['ownerId'],
             'label' => $validated['ownerType'],
@@ -424,9 +478,9 @@ class PeopleController extends Controller
             'type' => $validated['status'] ?? 'Active',
             'name' => $validated['otherDetail'] ?? $validated['name'] ?? null,
             'street' => $validated['fullAddress'] ?? $validated['detailAddress'] ?? null,
-            'district' => $validated['district'] ?? null,
-            'city' => $validated['city'] ?? null,
-            'province' => $validated['province'] ?? null,
+            'district' => $district?->name ?? $validated['district'] ?? null,
+            'city' => $regency?->name ?? $validated['city'] ?? null,
+            'province' => $province?->name ?? $validated['province'] ?? null,
             'postal_code' => $validated['postalCode'] ?? null,
             'country' => $validated['country'] ?? 'ID',
         ];
@@ -445,7 +499,11 @@ class PeopleController extends Controller
             'id' => (string) $address->id,
             'ownerType' => $ownerType,
             'ownerId' => (string) $address->addressable_id,
+            'provinceId' => $address->province_id ? (string) $address->province_id : null,
+            'regencyId' => $address->regency_id ? (string) $address->regency_id : null,
+            'districtId' => $address->district_id ? (string) $address->district_id : null,
             'customerId' => $ownerType === 'customer' ? (string) $address->addressable_id : null,
+            'supplierId' => $ownerType === 'supplier' ? (string) $address->addressable_id : null,
             'userId' => $ownerType === 'supplier' ? (string) $address->addressable_id : null,
             'name' => $address->recipient_name,
             'contact' => $address->phone,
@@ -458,7 +516,7 @@ class PeopleController extends Controller
             'otherDetail' => $address->name,
             'postalCode' => $address->postal_code,
             'country' => $address->country,
-            'status' => 'Active',
+            'status' => $address->type,
             'date' => $address->created_at?->toDateString(),
             'dateAdded' => $address->created_at?->toDateString(),
         ];

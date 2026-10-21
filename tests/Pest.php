@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\UserAdmin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -58,6 +59,7 @@ function something()
 function adminWithPermissions(string ...$permissions): User
 {
     $admin = User::factory()->admin()->create();
+    UserAdmin::query()->create(['user_id' => $admin->id, 'admin_code' => 'TEST-'.$admin->id, 'role' => '', 'stores' => [], 'all_stores' => true, 'status' => 'Active']);
 
     foreach ($permissions as $permission) {
         Permission::findOrCreate($permission, 'web');

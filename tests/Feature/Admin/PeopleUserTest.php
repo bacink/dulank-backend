@@ -6,6 +6,7 @@ use App\Models\DeleteAccountRequest;
 use App\Models\Store;
 use App\Models\Supplier;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 
 it('manages customers with derived balance and auto user', function () {
     $token = adminToken(adminWithPermissions('peoples.manage'));
@@ -147,17 +148,21 @@ it('manages members and user admins', function () {
         ->assertJsonPath('data.status', 'Suspended')
         ->assertJsonPath('data.verifiedEmail', true);
 
+    Role::findOrCreate('Manager', 'web');
+    Role::findOrCreate('Supervisor', 'web');
+    $branch = Store::query()->create(['store_name' => 'Kacetak Pusat']);
     $created = $this->withToken($token)->postJson('/api/v1/admin/user-admins', [
         'name' => 'Admin Dafa',
         'email' => 'admin.dafa@example.test',
         'role' => 'Manager',
-        'stores' => ['Kacetak Pusat'],
+        'stores' => [(string) $branch->id],
+        'password' => 'initialPassword123',
     ]);
 
     $created->assertCreated()
         ->assertJsonPath('data.name', 'Admin Dafa')
         ->assertJsonPath('data.role', 'Manager')
-        ->assertJsonPath('data.stores.0', 'Kacetak Pusat');
+        ->assertJsonPath('data.stores.0', (string) $branch->id);
 
     expect($created->json('data.adminCode'))->toStartWith('ADM-');
 

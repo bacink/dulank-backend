@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AccountSecurityController;
 use App\Http\Controllers\Api\V1\Admin\AdminProfileController;
 use App\Http\Controllers\Api\V1\Admin\AuthController;
 use App\Http\Controllers\Api\V1\Admin\BankAccountController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\Api\V1\Admin\MoneyTransferController;
 use App\Http\Controllers\Api\V1\Admin\OrderController;
 use App\Http\Controllers\Api\V1\Admin\OrganizationController;
 use App\Http\Controllers\Api\V1\Admin\PaperController;
+use App\Http\Controllers\Api\V1\Admin\PasswordRecoveryController;
 use App\Http\Controllers\Api\V1\Admin\PaymentController;
 use App\Http\Controllers\Api\V1\Admin\PayrollController;
 use App\Http\Controllers\Api\V1\Admin\PeopleController;
@@ -52,16 +54,28 @@ use App\Http\Controllers\Api\V1\Admin\TaxRateController;
 use App\Http\Controllers\Api\V1\Admin\UserManagementController;
 use App\Http\Controllers\Api\V1\Admin\WebstoreController;
 use App\Http\Controllers\Api\V1\Admin\WorkflowController;
+use App\Http\Middleware\EnsureActiveAdmin;
+use App\Http\Middleware\ValidateMasterData;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->group(function (): void {
+    Route::post('auth/forgot-password', [PasswordRecoveryController::class, 'forgot'])->middleware('throttle:auth');
+    Route::post('auth/reset-password', [PasswordRecoveryController::class, 'reset'])->middleware('throttle:auth');
     Route::post('auth/login', [AuthController::class, 'login'])
         ->middleware(['throttle:api', 'throttle:auth']);
 
-    Route::middleware(['auth:sanctum', 'abilities:admin', 'throttle:admin'])->group(function (): void {
+    Route::middleware(['auth:sanctum', 'abilities:admin', EnsureActiveAdmin::class, 'throttle:admin'])->group(function (): void {
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
 
+        Route::get('account/security', [AccountSecurityController::class, 'show']);
+        Route::put('account/security', [AccountSecurityController::class, 'update']);
+        Route::post('account/two-factor/setup', [AccountSecurityController::class, 'setup'])->middleware('throttle:auth');
+        Route::post('account/two-factor/confirm', [AccountSecurityController::class, 'confirm'])->middleware('throttle:auth');
+        Route::delete('account/two-factor', [AccountSecurityController::class, 'disable'])->middleware('throttle:auth');
+        Route::delete('account/devices/{id}', [AccountSecurityController::class, 'revoke']);
+        Route::get('master-options', [PeopleController::class, 'options']);
+        Route::get('location-options', [RegionController::class, 'options']);
         Route::get('profile', [AdminProfileController::class, 'show']);
         Route::put('profile', [AdminProfileController::class, 'update']);
         Route::put('profile/password', [AdminProfileController::class, 'updatePassword']);
@@ -69,7 +83,7 @@ Route::prefix('admin')->group(function (): void {
         Route::post('uploads/image', [AdminProfileController::class, 'uploadImage']);
 
         // Order monitoring + pengiriman + retur penjualan.
-        Route::middleware('permission:orders.manage')->group(function (): void {
+        Route::middleware(['permission:orders.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('orders/stats', [OrderController::class, 'stats']);
             Route::get('orders', [OrderController::class, 'index']);
             Route::get('orders/{number}', [OrderController::class, 'show']);
@@ -91,7 +105,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Sales/POS + quotation + RFQ.
-        Route::middleware('permission:sales.manage')->group(function (): void {
+        Route::middleware(['permission:sales.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('sales', [SaleController::class, 'index']);
             Route::post('sales', [SaleController::class, 'store']);
             Route::post('sales/{number}/payments', [SaleController::class, 'recordPayment']);
@@ -113,7 +127,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Keuangan: pembayaran + invoice.
-        Route::middleware('permission:finance.manage')->group(function (): void {
+        Route::middleware(['permission:finance.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('payments', [PaymentController::class, 'index']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('payments/{payment}/verify', [PaymentController::class, 'verify']);
@@ -176,7 +190,7 @@ Route::prefix('admin')->group(function (): void {
             Route::post('output-taxes', [TaxController::class, 'outputStore']);
             Route::put('output-taxes/{outputTaxDocument}', [TaxController::class, 'outputUpdate']);
 
-            // Laporan kеuangan.
+            // Laporan kÐµuangan.
             Route::get('finance/summary', [FinanceReportController::class, 'summary']);
             Route::get('finance/cash-flow', [FinanceReportController::class, 'cashFlow']);
             Route::get('finance/balance-sheet', [FinanceReportController::class, 'balanceSheet']);
@@ -190,7 +204,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // User management: role & permission matrix.
-        Route::middleware('permission:users.manage')->group(function (): void {
+        Route::middleware(['permission:users.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('roles', [RoleController::class, 'index']);
             Route::post('roles', [RoleController::class, 'store']);
             Route::put('roles/{role}', [RoleController::class, 'update']);
@@ -213,7 +227,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Products & master katalog.
-        Route::middleware('permission:products.manage')->group(function (): void {
+        Route::middleware(['permission:products.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('products', [ProductController::class, 'index']);
             Route::post('products', [ProductController::class, 'store']);
             Route::get('products/{product}', [ProductController::class, 'show']);
@@ -252,7 +266,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Peoples: customers, customer-types, stores, addresses.
-        Route::middleware('permission:peoples.manage')->group(function (): void {
+        Route::middleware(['permission:peoples.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('customers', [PeopleController::class, 'customers']);
             Route::post('customers', [PeopleController::class, 'storeCustomer']);
             Route::put('customers/{customer}', [PeopleController::class, 'updateCustomer']);
@@ -276,7 +290,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Purchases: supplier, master item, pembelian, PO, retur.
-        Route::middleware('permission:purchases.manage')->group(function (): void {
+        Route::middleware(['permission:purchases.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('suppliers', [SupplierController::class, 'index']);
             Route::post('suppliers', [SupplierController::class, 'store']);
             Route::get('suppliers/{supplierId}', [SupplierController::class, 'show']);
@@ -316,7 +330,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // HRM: organisasi, karyawan, payroll, insentif.
-        Route::middleware('permission:hrm.manage')->group(function (): void {
+        Route::middleware(['permission:hrm.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('departments', [OrganizationController::class, 'departments']);
             Route::post('departments', [OrganizationController::class, 'storeDepartment']);
             Route::put('departments/{department}', [OrganizationController::class, 'updateDepartment']);
@@ -348,7 +362,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Workflow & produksi: flow, work flow, job order, job branch, progress.
-        Route::middleware('permission:workflow.manage')->group(function (): void {
+        Route::middleware(['permission:workflow.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('flow-categories', [WorkflowController::class, 'categories']);
             Route::post('flow-categories', [WorkflowController::class, 'storeCategory']);
             Route::put('flow-categories/{flowCategory}', [WorkflowController::class, 'updateCategory']);
@@ -395,7 +409,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Konten: blog, FAQ, client, download, footer, appearance.
-        Route::middleware('permission:content.manage')->group(function (): void {
+        Route::middleware(['permission:content.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('blogs', [BlogController::class, 'index']);
             Route::post('blogs', [BlogController::class, 'store']);
             Route::put('blogs/{blogPost}', [BlogController::class, 'update']);
@@ -439,7 +453,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Settings: grup, custom field, ban IP, bahasa.
-        Route::middleware('permission:settings.manage')->group(function (): void {
+        Route::middleware(['permission:settings.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('settings/{group}', [SettingController::class, 'show']);
             Route::put('settings/{group}', [SettingController::class, 'update']);
 
@@ -466,8 +480,9 @@ Route::prefix('admin')->group(function (): void {
             Route::delete('gateways/{group}/{itemId}', [GatewaySettingController::class, 'destroy']);
         });
 
-        // Wilayah (provinsi/kabupaten/kecamatan) — referensi alamat.
-        Route::middleware('permission:peoples.manage')->group(function (): void {
+        // Wilayah (provinsi/kabupaten/kecamatan) â€” referensi alamat.
+        Route::middleware(['permission:peoples.manage', ValidateMasterData::class])->group(function (): void {
+            Route::get('postal-codes', [RegionController::class, 'postalCodes']);
             Route::get('provinces', [RegionController::class, 'provinces']);
             Route::post('provinces', [RegionController::class, 'storeProvince']);
             Route::put('provinces/{province}', [RegionController::class, 'updateProvince']);
@@ -485,7 +500,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Dashboard & laporan.
-        Route::middleware('permission:reports.view')->group(function (): void {
+        Route::middleware(['permission:reports.view', ValidateMasterData::class])->group(function (): void {
             Route::get('dashboard', [DashboardController::class, 'index']);
             Route::get('dashboard/admin', [DashboardController::class, 'adminStats']);
             Route::get('dashboard/sales', [DashboardController::class, 'salesStats']);
@@ -495,7 +510,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Paper Shop & Machines (self + vendor).
-        Route::middleware('permission:products.manage')->group(function (): void {
+        Route::middleware(['permission:products.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('paper-groups', [PaperController::class, 'groups']);
             Route::post('paper-groups', [PaperController::class, 'storeGroup']);
             Route::put('paper-groups/{paperGroup}', [PaperController::class, 'updateGroup']);
@@ -551,7 +566,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Promo: banner, coupon, voucher, diskon.
-        Route::middleware('permission:sales.manage')->group(function (): void {
+        Route::middleware(['permission:sales.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('banners', [PromoController::class, 'banners']);
             Route::post('banners', [PromoController::class, 'storeBanner']);
             Route::put('banners/{banner}', [PromoController::class, 'updateBanner']);
@@ -584,7 +599,7 @@ Route::prefix('admin')->group(function (): void {
         });
 
         // Webstore monitoring.
-        Route::middleware('permission:orders.manage')->group(function (): void {
+        Route::middleware(['permission:orders.manage', ValidateMasterData::class])->group(function (): void {
             Route::get('webstore/carts', [WebstoreController::class, 'carts']);
             Route::get('webstore/checkout', [WebstoreController::class, 'checkouts']);
             Route::get('webstore/wishlist', [WebstoreController::class, 'wishlist']);

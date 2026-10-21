@@ -51,6 +51,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'join_date' => 'date',
             'last_login_at' => 'datetime',
+            'password_changed_at' => 'datetime',
             'attach_tax_invoice' => 'boolean',
             'type' => AccountType::class,
             'two_factor_secret' => 'encrypted',

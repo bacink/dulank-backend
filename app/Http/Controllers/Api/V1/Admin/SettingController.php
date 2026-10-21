@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SettingController extends Controller
 {
@@ -24,6 +25,16 @@ class SettingController extends Controller
             ->mapWithKeys(fn (Setting $setting) => [$setting->key => $setting->value])
             ->all();
 
+        if ($group === 'currency' && ! isset($payload['items'])) {
+            $legacy = Setting::query()->where('group', 'currencies')->where('key', 'default')->value('value');
+            if (is_array($legacy)) {
+                $payload['items'] = [['id' => $legacy['code'] ?? 'IDR', 'code' => $legacy['code'] ?? 'IDR', 'name' => $legacy['name'] ?? '', 'symbol' => $legacy['symbol'] ?? '', 'exchangeRate' => $legacy['rate'] ?? 1, 'isDefault' => true, 'status' => strtolower($legacy['status'] ?? 'Active'), 'createdOn' => '']];
+            }
+        }
+        if ($group === 'company') {
+            $payload = array_replace((array) ($payload['profile'] ?? []), array_diff_key($payload, ['profile' => true]));
+        }
+
         return ApiResponse::success([
             'group' => $group,
             'values' => $payload,
@@ -33,8 +44,37 @@ class SettingController extends Controller
     public function update(Request $request, string $group): JsonResponse
     {
         $values = $request->all();
+        if ($group === 'prefixes') {
+            foreach ($values as $key => $prefix) {
+                $text = is_array($prefix) ? ($prefix['prefix'] ?? null) : $prefix;
+                if (! is_string($text) || ! preg_match('/^[A-Za-z0-9][A-Za-z0-9_-]{0,19}$/', $text)) {
+                    throw ValidationException::withMessages([$key => ['Prefix wajib 1?20 huruf, angka, underscore atau tanda hubung.']]);
+                }
+            }
+        }
+        if ($group === 'currency') {
+            $request->validate(['items' => ['required', 'array'], 'items.*.code' => ['required', 'string', 'size:3', 'distinct'], 'items.*.exchangeRate' => ['required', 'numeric', 'gt:0'], 'items.*.isDefault' => ['required', 'boolean'], 'items.*.status' => ['required', 'in:active,inactive']]);
+            if (count(array_filter($values['items'], fn ($item) => $item['isDefault'] && $item['status'] === 'active')) !== 1) {
+                throw ValidationException::withMessages(['items' => ['Pilih tepat satu mata uang default yang aktif.']]);
+            }
+        }
+        if ($group === 'security') {
+            return ApiResponse::error('Gunakan endpoint account/security untuk pengaturan akun.', 422);
+        }
+        if ($group === 'company') {
+            $request->validate(['companyName' => ['sometimes', 'string', 'max:255'], 'email' => ['sometimes', 'nullable', 'email'], 'currency' => ['sometimes', 'string', 'size:3']]);
+            $existing = Setting::query()->where('group', 'company')->where('key', 'profile')->value('value') ?? [];
+            foreach (Setting::query()->where('group', 'company')->where('key', '!=', 'profile')->get() as $setting) {
+                $existing[$setting->key] = $setting->value;
+            }
+            $values = ['profile' => array_replace((array) $existing, $values)];
+
+        }
 
         DB::transaction(function () use ($values, $group, $request): void {
+            if ($group === 'company') {
+                Setting::query()->where('group', 'company')->where('key', '!=', 'profile')->delete();
+            }
             foreach ($values as $key => $value) {
                 Setting::query()->updateOrCreate(
                     ['group' => $group, 'key' => (string) $key],

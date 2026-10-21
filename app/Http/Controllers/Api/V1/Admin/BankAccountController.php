@@ -9,7 +9,9 @@ use App\Http\Resources\Admin\BankAccountTypeResource;
 use App\Http\Resources\Admin\BankLedgerEntryResource;
 use App\Models\BankAccount;
 use App\Models\BankAccountType;
+use App\Services\BranchAccess;
 use App\Services\LedgerService;
+use App\Services\MasterDataService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,7 @@ class BankAccountController extends Controller
     {
         if ($id = $request->input('id')) {
             $bankAccountType = BankAccountType::query()->findOrFail($id);
+
             return $this->updateType($request, $bankAccountType);
         }
 
@@ -85,10 +88,12 @@ class BankAccountController extends Controller
     {
         if ($id = $request->input('id')) {
             $bankAccount = BankAccount::query()->findOrFail($id);
+
             return $this->update($request, $bankAccount);
         }
 
         $validated = $request->validated();
+        BranchAccess::assertAllowed($validated['branchId'] ?? null);
 
         $account = BankAccount::query()->create([
             'branch_id' => $validated['branchId'] ?? null,
@@ -108,6 +113,10 @@ class BankAccountController extends Controller
     public function update(StoreBankAccountRequest $request, BankAccount $bankAccount): JsonResponse
     {
         $validated = $request->validated();
+        BranchAccess::assertAllowed($validated['branchId'] ?? $bankAccount->branch_id);
+        if (isset($validated['openingBalance']) && (int) $validated['openingBalance'] !== (int) $bankAccount->opening_balance && $bankAccount->ledgerEntries()->exists()) {
+            return ApiResponse::error('Saldo awal tidak dapat diubah setelah ada mutasi.', 422);
+        }
 
         $bankAccount->forceFill([
             'branch_id' => $validated['branchId'] ?? $bankAccount->branch_id,
@@ -126,6 +135,7 @@ class BankAccountController extends Controller
 
     public function destroy(BankAccount $bankAccount): JsonResponse
     {
+        MasterDataService::assertDeletable($bankAccount);
         $bankAccount->delete();
 
         return ApiResponse::success(['id' => (string) $bankAccount->id, 'removed' => true]);

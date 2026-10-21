@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -25,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ResetPassword::createUrlUsing(function ($user, string $token): string {
+            $base = $user->isAdmin() ? config('dulank.admin_url') : config('dulank.store_url');
+
+            return rtrim($base, '/').'/reset-password?'.http_build_query(['token' => $token, 'email' => $user->email]);
+        });
+
         Gate::before(function (?User $user, string $ability, array $arguments = []): ?bool {
             if ($user === null || ! $user->isAdmin()) {
                 return null;

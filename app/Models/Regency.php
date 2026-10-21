@@ -13,7 +13,7 @@ class Regency extends Model
     /** @use HasFactory<RegencyFactory> */
     use HasFactory;
 
-    protected $fillable = ['province_id', 'code', 'name', 'type'];
+    protected $fillable = ['status', 'province_id', 'code', 'name', 'type'];
 
     /**
      * @return BelongsTo<Province, $this>

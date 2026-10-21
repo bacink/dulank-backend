@@ -13,6 +13,7 @@ class Address extends Model
     use HasFactory;
 
     protected $fillable = [
+        'province_id', 'regency_id', 'district_id',
         'addressable_type',
         'addressable_id',
         'label',

@@ -12,7 +12,7 @@ class UserAdmin extends Model
     /** @use HasFactory<UserAdminFactory> */
     use HasFactory;
 
-    protected $fillable = ['user_id', 'admin_code', 'role', 'stores', 'status', 'descriptions'];
+    protected $fillable = ['all_stores', 'user_id', 'admin_code', 'role', 'stores', 'status', 'descriptions'];
 
     /**
      * @return array<string, string>
@@ -21,6 +21,7 @@ class UserAdmin extends Model
     {
         return [
             'stores' => 'array',
+            'all_stores' => 'boolean',
         ];
     }
 

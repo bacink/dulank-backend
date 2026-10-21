@@ -10,6 +10,7 @@ use App\Models\SubCategory;
 use App\Models\Unit;
 use App\Models\Variant;
 use App\Models\WorkshopService;
+use App\Services\MasterDataService;
 use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -114,7 +115,7 @@ class CatalogMasterController extends Controller
         $validated = $this->validateSubCategory($request);
 
         $subCategory = SubCategory::query()->create([
-            'category_id' => $this->categoryId($validated['category']),
+            'category_id' => $validated['categoryId'] ?? $this->categoryId($validated['category']),
             'name' => $validated['name'],
             'code' => $validated['code'] ?? null,
             'description' => $validated['description'] ?? null,
@@ -130,7 +131,7 @@ class CatalogMasterController extends Controller
         $validated = $this->validateSubCategory($request);
 
         $subCategory->forceFill([
-            'category_id' => $this->categoryId($validated['category']),
+            'category_id' => $validated['categoryId'] ?? $this->categoryId($validated['category']),
             'name' => $validated['name'],
             'code' => $validated['code'] ?? $subCategory->code,
             'description' => $validated['description'] ?? null,
@@ -168,6 +169,7 @@ class CatalogMasterController extends Controller
     {
         if ($id = $request->input('id')) {
             $unit = Unit::query()->findOrFail($id);
+
             return $this->updateUnit($request, $unit);
         }
 
@@ -411,7 +413,8 @@ class CatalogMasterController extends Controller
     private function validateSubCategory(Request $request): array
     {
         return $request->validate([
-            'category' => ['required', 'string', 'max:255'],
+            'categoryId' => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
+            'category' => ['required_without:categoryId', 'nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'code' => ['sometimes', 'nullable', 'string', 'max:40'],
             'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
@@ -502,10 +505,7 @@ class CatalogMasterController extends Controller
 
     private function categoryId(string $name): int
     {
-        return Category::query()->firstOrCreate(
-            ['name' => trim($name)],
-            ['code' => 'CAT-'.strtoupper(Str::random(6)), 'slug' => $this->uniqueSlug(Category::class, $name, 'slug')],
-        )->id;
+        return MasterDataService::resolve(Category::class, null, $name, 'categoryId');
     }
 
     /**

@@ -5,14 +5,19 @@ namespace App\Http\Controllers\Api\V1\Admin;
 use App\Enums\AccountType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminIndexRequest;
+use App\Models\Store;
 use App\Models\User;
 use App\Models\UserAdmin;
+use App\Services\BranchAccess;
+use App\Services\MasterDataService;
 use App\Support\ApiResponse;
 use App\Support\DocumentNumber;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
 /**
  * User management: members (user store) dan user admins.
@@ -51,6 +56,7 @@ class UserManagementController extends Controller
 
     public function updateMember(Request $request, User $user): JsonResponse
     {
+        abort_unless($user->isStore(), 404);
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
@@ -74,6 +80,8 @@ class UserManagementController extends Controller
 
     public function destroyMember(User $user): JsonResponse
     {
+        abort_unless($user->isStore(), 404);
+        MasterDataService::assertDeletable($user);
         $user->delete();
 
         return ApiResponse::success(['id' => (string) $user->id, 'removed' => true]);
@@ -114,31 +122,21 @@ class UserManagementController extends Controller
     {
         $validated = $this->validateUserAdmin($request);
 
-        $admin = DB::transaction(function () use ($validated): UserAdmin {
-            $user = User::query()->firstOrCreate(
-                ['email' => $validated['email']],
-                [
-                    'name' => $validated['name'],
-                    'password' => $validated['password'] ?? 'password',
-                    'type' => AccountType::Admin,
-                    'phone' => $validated['phone'] ?? null,
-                    'status' => 'Active',
-                    'join_date' => now(),
-                ],
-            );
+        $admin = DB::transaction(function () use ($request, $validated): UserAdmin {
+            $role = $this->resolveRole($request, $validated['role']);
+            $user = User::query()->create([
+                'email' => mb_strtolower($validated['email']), 'name' => $validated['name'],
+                'password' => $validated['password'], 'type' => AccountType::Admin,
+                'phone' => $validated['phone'] ?? null, 'status' => $validated['status'] ?? 'Active', 'join_date' => now(),
+            ]);
+            $user->syncRoles([$role]);
 
-            $user->forceFill(['type' => AccountType::Admin])->save();
-
-            return UserAdmin::query()->updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'admin_code' => $validated['adminCode'] ?? DocumentNumber::next('user_admin', UserAdmin::query(), 'admin_code', 3),
-                    'role' => $validated['role'] ?? 'Admin',
-                    'stores' => $validated['stores'] ?? null,
-                    'status' => $validated['status'] ?? 'Active',
-                    'descriptions' => $validated['descriptions'] ?? null,
-                ],
-            );
+            return UserAdmin::query()->create([
+                'user_id' => $user->id,
+                'admin_code' => $validated['adminCode'] ?? DocumentNumber::next('user_admin', UserAdmin::query(), 'admin_code', 3),
+                'role' => $role->name, 'stores' => array_map('strval', $validated['stores']),
+                'status' => $validated['status'] ?? 'Active', 'descriptions' => $validated['descriptions'] ?? null,
+            ]);
         });
 
         return ApiResponse::success($this->userAdminPayload($admin->load('user')), [], 201);
@@ -146,16 +144,27 @@ class UserManagementController extends Controller
 
     public function updateUserAdmin(Request $request, UserAdmin $userAdmin): JsonResponse
     {
+        abort_if($userAdmin->user_id === $request->user()->id && ($request->input('status') === 'Inactive'), 422, 'Tidak dapat menonaktifkan akun sendiri.');
+        abort_if($userAdmin->user?->hasRole('super-admin') && ! $request->user()->hasRole('super-admin'), 403);
+        abort_if($userAdmin->user_id === $request->user()->id && $request->filled('role') && $request->input('role') !== $userAdmin->role, 422, 'Tidak dapat mengganti role sendiri.');
         $validated = $this->validateUserAdmin($request, false);
 
-        DB::transaction(function () use ($userAdmin, $validated): void {
+        DB::transaction(function () use ($request, $userAdmin, $validated): void {
             if ($userAdmin->user !== null) {
                 $userAdmin->user->forceFill([
+                    'email' => $validated['email'] ?? $userAdmin->user->email,
+                    'status' => $validated['status'] ?? $userAdmin->user->status,
                     'name' => $validated['name'] ?? $userAdmin->user->name,
                     'phone' => $validated['phone'] ?? $userAdmin->user->phone,
                 ])->save();
             }
 
+            if (isset($validated['role'])) {
+                $userAdmin->user->syncRoles([$this->resolveRole($request, $validated['role'])]);
+            }
+            if (($validated['status'] ?? null) === 'Inactive') {
+                $userAdmin->user->tokens()->delete();
+            }
             $userAdmin->forceFill([
                 'role' => $validated['role'] ?? $userAdmin->role,
                 'stores' => $validated['stores'] ?? $userAdmin->stores,
@@ -169,7 +178,14 @@ class UserManagementController extends Controller
 
     public function destroyUserAdmin(UserAdmin $userAdmin): JsonResponse
     {
-        $userAdmin->delete();
+        abort_if($userAdmin->user_id === auth()->id(), 422, 'Tidak dapat menghapus akun sendiri.');
+        abort_if($userAdmin->user?->hasRole('super-admin'), 422, 'Admin utama tidak dapat dihapus.');
+        DB::transaction(function () use ($userAdmin): void {
+            $userAdmin->user?->forceFill(['status' => 'Inactive'])->save();
+            $userAdmin->user?->tokens()->delete();
+            $userAdmin->user?->syncRoles([]);
+            $userAdmin->delete();
+        });
 
         return ApiResponse::success(['id' => (string) $userAdmin->id, 'removed' => true]);
     }
@@ -179,17 +195,34 @@ class UserManagementController extends Controller
      */
     private function validateUserAdmin(Request $request, bool $creating = true): array
     {
-        return $request->validate([
+        if ($request->filled('email')) {
+            $request->merge(['email' => mb_strtolower(trim($request->input('email')))]);
+        }
+
+        $validated = $request->validate([
             'name' => [$creating ? 'required' : 'sometimes', 'string', 'max:255'],
-            'email' => [$creating ? 'required' : 'sometimes', 'email', 'max:255'],
-            'password' => ['sometimes', 'nullable', 'string', 'min:8'],
+            'email' => [$creating ? 'required' : 'sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->route('userAdmin')?->user_id)],
+            'password' => [$creating ? 'required' : 'prohibited', 'string', 'min:8'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
-            'adminCode' => ['sometimes', 'nullable', 'string', 'max:60'],
-            'role' => ['sometimes', 'nullable', 'string', 'max:60'],
-            'stores' => ['sometimes', 'nullable', 'array'],
+            'adminCode' => ['sometimes', 'nullable', 'string', 'max:60', Rule::unique('user_admins', 'admin_code')->ignore($request->route('userAdmin'))],
+            'role' => [$creating ? 'required' : 'sometimes', 'string', 'max:60', Rule::exists('roles', 'name')->where('guard_name', 'web')],
+            'stores' => [$creating ? 'required' : 'sometimes', 'array', 'min:1'],
+            'stores.*' => ['required', 'integer', 'distinct', Rule::exists('stores', 'id')->where('status', 'Active')],
             'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
             'descriptions' => ['sometimes', 'nullable', 'string', 'max:2000'],
         ]);
+        foreach ($validated['stores'] ?? [] as $storeId) {
+            BranchAccess::assertAllowed($storeId);
+        }
+
+        return $validated;
+    }
+
+    private function resolveRole(Request $request, string $name): Role
+    {
+        abort_if($name === 'super-admin' && ! $request->user()->hasRole('super-admin'), 403);
+
+        return Role::findByName($name, 'web');
     }
 
     /**
@@ -224,6 +257,7 @@ class UserManagementController extends Controller
             'email' => $admin->user?->email,
             'role' => $admin->role,
             'stores' => $admin->stores ?? [],
+            'storeNames' => Store::query()->whereIn('id', $admin->stores ?? [])->pluck('store_name')->all(),
             'status' => $admin->status,
             'phone' => $admin->user?->phone,
             'avatar' => $admin->user?->avatar_path,

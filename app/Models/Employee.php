@@ -28,6 +28,7 @@ class Employee extends Model
         'gender',
         'dob',
         'join_channel',
+        'emergency_contact2_name', 'emergency_contact2_phone',
         'emergency_contact_name',
         'emergency_contact_phone',
         'email',

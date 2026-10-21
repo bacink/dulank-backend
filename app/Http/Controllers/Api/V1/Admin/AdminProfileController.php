@@ -9,6 +9,7 @@ use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 /**
  * Profil & upload admin (banner/produk/avatar).
@@ -28,14 +29,18 @@ class AdminProfileController extends Controller
     public function update(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
+            'taxAddress' => ['sometimes', 'nullable', 'string', 'max:255'],
             'name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
         ]);
 
         $user = $request->user();
         $user->forceFill([
+            'email' => $validated['email'] ?? $user->email,
+            'tax_address' => $validated['taxAddress'] ?? $user->tax_address,
             'name' => $validated['name'] ?? $user->name,
-            'phone' => $validated['phone'] ?? $user->phone,
+            'phone' => array_key_exists('phone', $validated) ? $validated['phone'] : $user->phone,
         ])->save();
 
         return ApiResponse::success(new UserResource($user));
@@ -56,7 +61,11 @@ class AdminProfileController extends Controller
             ]);
         }
 
-        $user->forceFill(['password' => $validated['password']])->save();
+        $user->forceFill(['password' => $validated['password'], 'password_changed_at' => now()])->save();
+        $currentTokenId = $user->currentAccessToken()?->getKey();
+        $user->tokens()->when($currentTokenId, fn ($query) => $query->whereKeyNot($currentTokenId))->delete();
+
+        activity('account-security')->causedBy($user)->log('Password akun diperbarui');
 
         return ApiResponse::success(['updated' => true]);
     }

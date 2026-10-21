@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AdminIndexRequest;
 use App\Http\Requests\Admin\StoreSupplierRequest;
 use App\Http\Resources\Admin\SupplierResource;
 use App\Models\Supplier;
+use App\Services\MasterDataService;
 use App\Support\ApiResponse;
 use App\Support\DocumentNumber;
 use Illuminate\Database\Eloquent\Builder;
@@ -90,6 +91,7 @@ class SupplierController extends Controller
     public function destroy(string $supplierId): JsonResponse
     {
         $supplier = Supplier::query()->where('code', $supplierId)->firstOrFail();
+        MasterDataService::assertDeletable($supplier);
         $supplier->delete();
 
         return ApiResponse::success(['id' => $supplierId, 'removed' => true]);

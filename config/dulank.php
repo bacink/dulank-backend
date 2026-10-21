@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'admin_url' => env('DULANK_ADMIN_URL', 'http://localhost:3000'),
+    'store_url' => env('DULANK_STORE_URL', 'http://localhost:3001'),
 
     /*
     |--------------------------------------------------------------------------

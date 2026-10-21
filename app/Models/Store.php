@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Services\BranchAccess;
 use Database\Factories\StoreFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,11 @@ class Store extends Model
 {
     /** @use HasFactory<StoreFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('admin_branch', fn (Builder $query) => BranchAccess::scope($query, 'id'));
+    }
 
     protected $fillable = [
         'store_name',

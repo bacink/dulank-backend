@@ -48,6 +48,8 @@ it('manages roles and assigns them to users', function () {
         ->assertOk()
         ->assertJsonPath('data.name', 'Sales Supervisor');
 
+    $this->withToken($token)->deleteJson("/api/v1/admin/roles/{$roleId}")->assertConflict();
+    $staff->syncRoles([]);
     $this->withToken($token)->deleteJson("/api/v1/admin/roles/{$roleId}")
         ->assertOk()
         ->assertJsonPath('data.removed', true);
