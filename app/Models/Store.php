@@ -20,7 +20,7 @@ class Store extends Model
         static::addGlobalScope('admin_branch', fn (Builder $query) => BranchAccess::scope($query, 'id'));
     }
 
-    protected $fillable = [
+    protected $fillable = ['photo_path',
         'store_name',
         'user_id',
         'address',

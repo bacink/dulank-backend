@@ -53,6 +53,7 @@ class SupplierController extends Controller
         $supplier = Supplier::query()->create([
             'code' => $validated['supplierId'] ?? DocumentNumber::next('supplier', Supplier::query(), 'code', 3),
             'name' => $validated['name'],
+            'photo_path' => $validated['photo'] ?? null,
             'email' => $validated['email'] ?? null,
             'contact' => $validated['contact'] ?? null,
             'pic_name' => $validated['picName'] ?? null,
@@ -78,6 +79,7 @@ class SupplierController extends Controller
         $supplier->forceFill([
             'code' => $validated['supplierId'] ?? $supplier->code,
             'name' => $validated['name'],
+            'photo_path' => array_key_exists('photo', $validated) ? $validated['photo'] : $supplier->photo_path,
             'email' => $validated['email'] ?? null,
             'contact' => $validated['contact'] ?? null,
             'pic_name' => $validated['picName'] ?? null,

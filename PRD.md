@@ -813,3 +813,46 @@ Backup penuh: `storage/app/private/backups/before-stages-3-5-20261020-210307.sql
 Endpoint read-only location-options menyediakan provinsi/kabupaten/kecamatan aktif untuk form karyawan tanpa memberi hak mutasi wilayah. Pilihan manager dapat dibaca HR. Subkategori sekarang hanya menerima ID atau label kategori existing yang unik setelah trim/case; label salah tidak membuat master baru. Frontend edit karyawan membaca detail by ID (bebas pagination), menahan simpan sebelum load sukses, tanggal add memakai ISO date, dan mata uang menjaga submit bersamaan/ID edit yang tidak ada.
 
 Validasi: full Pest 211 tests / 2.111 assertions PASS; setelah perubahan resolver terakhir, foundation + catalog 26 tests / 147 assertions PASS. Pint PASS. Nuxt typecheck/build/structure/diff PASS. Browser inventory dicek ulang kosong; audit MySQL hari ini gagal koneksi ditolak 127.0.0.1:3306. Hasil restore backup, 37 migration, dan audit 0 error/40 warning pada bagian sebelumnya adalah evidence 20 Oktober, tidak diklaim diulang hari ini. Tidak menjalankan seeder/migration lagi, tidak mengubah akun riil, tidak mengirim email. SMTP, browser/reload, dan scope transaksi cabang menyeluruh tetap belum diverifikasi/diselesaikan. Branch Rama; NOT COMMITTED / NOT PUSHED.
+
+
+### Seeder terpisah tahap 1-5 tanpa produk - 21 Oktober 2026
+
+Atas permintaan pengguna dibuat `database/seeders/FoundationStagesOneToFiveSeeder.php`, dipanggil manual dengan `php artisan db:seed --class=FoundationStagesOneToFiveSeeder --no-interaction`. Tidak ditambahkan ke DatabaseSeeder, tidak memanggil seeder lama, dan tidak dijalankan pada database kerja. Hanya local/testing; transaksi utuh; rerun tidak menimpa record existing/hasil edit. Identitas fixture yang bertabrakan tanpa provenance ditolak. Record baru dilacak lewat legacy_id_map source=demo-foundation-1-5.
+
+Dataset: profil perusahaan/default IDR/prefix bila belum tersedia, permission standar dan dua role terbatas, dua admin contoh nonaktif/password acak beserta penugasan cabang, dua cabang, rantai wilayah/alamat, tiga tipe/enam pelanggan nonaktif, tiga supplier, sembilan alamat, empat departemen/jabatan/karyawan, dua kas cabang saldo nol, kategori pendapatan/pengeluaran, pajak simulasi nonaktif, dan dua partner nonaktif tanpa listing. Master referensi existing dipakai ulang tanpa diubah. Tidak membuat akun super-admin, token, email keluar atau transaksi. Hak role existing tidak diubah.
+
+Seluruh domain produk dikecualikan secara konservatif: produk/varian/spec/proses, kategori/subkategori/satuan/varian master, bahan/purchase item, kertas/harga/mesin/jasa/kalkulator/margin, workflow dan turunannya. Payroll/transaksi serta konten/promo juga tidak diseed. DemoMasterDataSeeder lama masih mengandung produk dan bukan entry point untuk pekerjaan ini.
+
+Daftar data, jumlah fixture, halaman yang diimplementasikan, pengecualian, cara pakai dan batas validasi disimpan di `../DONE.md` (root workspace). Status halaman tetap implemented/API tested, browser verification pending; bukan seluruh aplikasi selesai. Pengujian seeder baru PASS 6 tests / 222 assertions, termasuk snapshot tabel produk/katalog yang tidak berubah, idempotensi/preserve data existing, rollback benturan, parent konflik, guard production. Pint dan diff check PASS. Frontend source tidak diubah sehingga build/typecheck tidak diulang; browser/SMTP/live DB tidak dijalankan. Baseline backend 9d7c8f7; branch Rama; perubahan saat ini NOT COMMITTED / NOT PUSHED.
+
+
+### Eksekusi FoundationStagesOneToFiveSeeder - 21 Oktober 2026
+
+Atas instruksi eksplisit pengguna, seeder baru telah dijalankan pada MySQL lokal dan berhasil. Tidak menjalankan seeder lama/default. Backup sebelum eksekusi `storage/app/private/backups/before-foundation-1-5-seed-20261021-085152.sql` SHA-256 779bbd04fcc0f434f689de16a8a1cfc9e93e86d3b05c8c5f279ecf5ed1881364; snapshot dan verification JSON tersimpan privat di folder yang sama.
+
+Hasil aktual: 57 record baru (8 user nonaktif, 2 profil admin, 2 role, 2 cabang, 6 pelanggan, 3 supplier, 9 alamat, 2 departemen, 4 jabatan, 4 karyawan, 2 kas nol, 4 kategori expense, 3 kategori income, 2 partner nonaktif, 2 kode pos contoh, 1 pajak simulasi nonaktif, 1 setting prefix), 57 provenance, 2 pivot user-role, 6 pivot role-permission, 3 aktivitas. Master lain dipakai ulang tanpa ditimpa. Invalidasi cache permission merupakan perubahan runtime yang diharapkan.
+
+Verifikasi 12.347 baris lama di 131 tabel non-cache: semua tetap utuh; seluruh domain produk/katalog/bahan/mesin/harga/workflow dan transaksi yang dilindungi identik sebelum/sesudah. Audit aktual 133 tabel, 0 error, 34 kategori warning. Belum berarti kelengkapan data usaha atau semua halaman siap produksi. DONE.md sudah diperbarui dari status belum dijalankan menjadi berhasil dijalankan lokal. Tidak ada source aplikasi berubah; tes/build tidak diulang untuk eksekusi data ini. Rama; NOT COMMITTED / NOT PUSHED.
+
+
+## 16. Revisi form/tabel dan CRUD master - 21 Oktober 2026
+
+- Store dan Supplier menambah photo_path nullable lewat migration 2026_10_21_101715; API menerima photo URL/null dan GET mengembalikan photo. Customer memakai avatar_path akun existing. Omitted photo dipertahankan; null menghapus referensi. Upload melalui endpoint image existing, tidak menyimpan base64 ke database. Edit pelanggan mempertahankan status akun bila tidak dikirim; manager nonaktif yang sudah terpasang pada toko dapat dipertahankan saat edit, tetapi assignment baru harus admin aktif.
+- Department dan Designation menerima memberIds array ID employee yang valid/distinct. Legacy members berupa nama tetap diterima hanya bila dapat diresolusikan unik. Assignment, pelepasan dan update record dilakukan dalam satu transaksi; memberIds yang tidak dikirim tidak mengubah assignment, [] melepaskan semua anggota. Nama/tanggal/count dibaca dari relasi/server; status Inactive kanonik dengan adapter Disable untuk pemanggil lama. GET menyertakan memberIds/members/totalMembers/employeeCount/createdDate/createdOn. Master yang masih direferensikan tetap tidak dapat dihapus.
+- GET roles menyertakan usersCount/canDelete/deleteReason. Penghitungan lewat pivot User yang eksplisit menghindari eager withCount users pada Spatie Role tanpa guard_name instance yang memicu error. DELETE role terpakai tetap 409 dan super-admin tetap dilindungi; UI menampilkan alasan serta menonaktifkan tombol. Role kosong dapat dihapus, tanpa mencabut assignment akun lain.
+- Add Address customer/supplier diperbaiki di frontend: mengirim PK id, bukan code/customerId/supplierId bisnis. Validasi integer/exists dan parent chain server tetap dipertahankan. Placeholder Auto Generated di form customer/supplier tidak lagi dikirim sebagai kode baru. DOB/join date modal memakai date, ISO/legacy dinormalisasi. Foto dan filter tipe pelanggan mengikuti data aktual.
+
+Backend full PASS 226 tests / 2.409 assertions, termasuk 8 regresi baru / 72 assertions; Pint PASS. Frontend build/typecheck/structure PASS. Browser desktop/mobile/reload/console tidak diuji karena inventory kosong. Audit statis mengganti seluruh ikon font/data-feather aktif yang ditemukan dan mengisi header aksi kosong; tidak mengubah bisnis POS atau data/harga produk.
+
+Migration diterapkan lokal setelah backup storage/app/private/backups/before-design-revision-20261021-102409.sql (SHA-256 5f76e1c110aa787b64272aba25e3125db13be8c5504b679b73ebc1c50bf9cf2f). Perbandingan seluruh kolom lama: 12.433 baris pada 130 tabel bisnis/non-cache/non-migration identik; tidak ada seeding/mutasi record bisnis. Evidence JSON privat disimpan bersama backup.
+
+TO-DO.md baru di root workspace merinci gate tertunda dan tahap 6-14, produk milik tim produk. DONE.md mencatat tahap 1-5 dan revisi pada cakupan implementasinya. Tidak mengklaim seluruh UI verified atau siap produksi. Branch Rama; NOT COMMITTED / NOT PUSHED; tidak melakukan Git mutating.
+
+Audit live akhir revisi: 133 tabel, 0 error, 33 kategori warning; data/relasi lama yang belum lengkap tetap dipertahankan.
+
+
+### Perbaikan respons partner tanpa metrics - 21 Oktober 2026
+
+Halaman semua-percetakan/semua-toko-kertas sebelumnya membaca metrics.offset/paper pada null. Adapter Nuxt sekarang menormalkan null/missing dan nama field Count backend; filter memakai type printing_shop/paper_store. Payload partner Laravel menambahkan joinDate dan subscribed dari kolom aktual. Missing metrics tetap null di API; GET tidak membuat record metrics maupun data katalog. Tidak mengubah data produk/harga/mesin/kertas atau mengklaim alur moderation penuh selesai.
+
+Pest CalculatorPartnerNullMetricsTest PASS 3 tes / 17 assertions (dua tipe tanpa metrics/filter/date/subscription dan angka nonzero). Pint PASS; full backend tidak diulang karena delta respons ini dicakup target. Frontend Node feedback/adapter/SSR 7 tes PASS, kompilasi 830 template, build/typecheck/structure PASS. Revisi toast/photo/chip serta gate browser dicatat di DONE.md/TO-DO.md root. Browser belum tersedia; tidak melakukan migration/seeding/live data mutation. Rama; NOT COMMITTED / NOT PUSHED.

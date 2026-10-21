@@ -440,6 +440,8 @@ class CalculatorController extends Controller
             'id' => (string) $partner->id,
             'type' => $partner->type,
             'name' => $partner->name,
+            'joinDate' => $partner->join_date?->toDateString(),
+            'subscribed' => (bool) $partner->subscribed,
             'province' => $partner->province,
             'city' => $partner->city,
             'district' => $partner->district,

@@ -11,6 +11,7 @@ use App\Models\Customer;
 use App\Models\CustomerAccountEntry;
 use App\Models\CustomerType;
 use App\Models\District;
+use App\Models\Employee;
 use App\Models\PostalCode;
 use App\Models\Province;
 use App\Models\Regency;
@@ -18,6 +19,7 @@ use App\Models\Store;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\MasterDataService;
+use App\Services\MediaService;
 use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +41,9 @@ class PeopleController extends Controller
         $data = ['stores' => Store::query()->orderBy('store_name')->get(['id', 'store_name', 'status'])];
         if ($user->can('users.manage') || $user->can('peoples.manage') || $user->can('hrm.manage')) {
             $data['managers'] = User::query()->where('type', 'admin')->where('status', 'Active')->orderBy('name')->get(['id', 'name']);
+        }
+        if ($user->can('hrm.manage')) {
+            $data['employees'] = Employee::query()->orderBy('name')->get(['id', 'name']);
         }
         if ($user->can('users.manage')) {
             $data['roles'] = Role::query()->where('guard_name', 'web')->when(! $user->hasRole('super-admin'), fn ($query) => $query->where('name', '!=', 'super-admin'))->orderBy('name')->get(['id', 'name']);
@@ -182,6 +187,7 @@ class PeopleController extends Controller
         return ApiResponse::success($query->orderBy('store_name')->get()->map(fn (Store $store) => [
             'id' => (string) $store->id,
             'storeName' => $store->store_name,
+            'photo' => app(MediaService::class)->url($store->photo_path),
             'userName' => $store->manager?->name,
             'managerId' => $store->user_id !== null ? (string) $store->user_id : null,
             'address' => $store->address,
@@ -296,6 +302,7 @@ class PeopleController extends Controller
         return $request->validate([
             'customerId' => ['sometimes', 'nullable', 'string', 'max:40', Rule::unique('customers', 'code')->ignore($request->route('customer'))],
             'customerTypeId' => ['sometimes', 'nullable', 'integer', 'exists:customer_types,id'],
+            'photo' => ['sometimes', 'nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->route('customer')?->user_id)],
             'type' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -329,7 +336,8 @@ class PeopleController extends Controller
             'name' => $validated['name'],
             'email' => mb_strtolower($validated['email']),
             'phone' => $validated['phone'] ?? $user->phone,
-            'status' => ($validated['status'] ?? 'Active') === 'Active' ? 'Active' : 'Inactive',
+            'avatar_path' => array_key_exists('photo', $validated) ? $validated['photo'] : $user->avatar_path,
+            'status' => ($validated['status'] ?? $user->status ?? 'Active') === 'Active' ? 'Active' : 'Inactive',
         ])->save();
 
         $type = isset($validated['customerTypeId']) ? CustomerType::query()->findOrFail($validated['customerTypeId']) : null;
@@ -368,6 +376,7 @@ class PeopleController extends Controller
             'id' => (string) $customer->id,
             'customerId' => $customer->code,
             'name' => $customer->user?->name,
+            'photo' => app(MediaService::class)->url($customer->user?->avatar_path),
             'email' => $customer->user?->email,
             'type' => $customer->customerType?->name,
             'customerTypeId' => $customer->customer_type_id !== null ? (string) $customer->customer_type_id : null,
@@ -385,10 +394,16 @@ class PeopleController extends Controller
      */
     private function validateStore(Request $request): array
     {
+        $managerRule = Rule::exists('users', 'id')->where('type', 'admin');
+        if ((string) $request->input('managerId') !== (string) $request->route('store')?->user_id) {
+            $managerRule->where('status', 'Active');
+        }
+
         return $request->validate([
+            'photo' => ['sometimes', 'nullable', 'string', 'max:2048'],
             'storeName' => ['required', 'string', 'max:255'],
             'userName' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'managerId' => ['sometimes', 'nullable', 'integer', Rule::exists('users', 'id')->where('type', 'admin')->where('status', 'Active')],
+            'managerId' => ['sometimes', 'nullable', 'integer', $managerRule],
             'address' => ['sometimes', 'nullable', 'string', 'max:500'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
@@ -409,6 +424,7 @@ class PeopleController extends Controller
 
         return [
             'store_name' => $validated['storeName'],
+            'photo_path' => array_key_exists('photo', $validated) ? $validated['photo'] : $store?->photo_path,
             'user_id' => $managerId,
             'address' => $validated['address'] ?? null,
             'phone' => $validated['phone'] ?? null,

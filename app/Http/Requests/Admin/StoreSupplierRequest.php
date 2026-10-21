@@ -18,6 +18,7 @@ class StoreSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'photo' => ['sometimes', 'nullable', 'string', 'max:2048'],
             'supplierId' => [
                 'sometimes', 'nullable', 'string', 'max:60',
                 Rule::unique('suppliers', 'code')->ignore($this->route('supplierId'), 'code'),

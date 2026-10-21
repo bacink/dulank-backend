@@ -15,7 +15,7 @@ class Supplier extends Model
     /** @use HasFactory<SupplierFactory> */
     use HasFactory, LogsActivity;
 
-    protected $fillable = ['code', 'name', 'email', 'contact', 'pic_name', 'status', 'date'];
+    protected $fillable = ['photo_path', 'code', 'name', 'email', 'contact', 'pic_name', 'status', 'date'];
 
     /**
      * @return array<string, string>

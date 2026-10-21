@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserAdmin;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -17,6 +18,7 @@ class RoleController extends Controller
 {
     public function index(): JsonResponse
     {
+        $userCounts = DB::table(config('permission.table_names.model_has_roles'))->where('model_type', (new User)->getMorphClass())->select('role_id', DB::raw('COUNT(*) as total'))->groupBy('role_id')->pluck('total', 'role_id');
         $roles = Role::query()
             ->with(['permissions'])
             ->withCount('permissions')
@@ -28,6 +30,9 @@ class RoleController extends Controller
                 'createdOn' => $role->created_at?->toDateString(),
                 'description' => $role->description,
                 'permissionsCount' => $role->permissions_count,
+                'usersCount' => (int) ($userCounts[$role->id] ?? 0),
+                'canDelete' => $role->name !== 'super-admin' && (int) ($userCounts[$role->id] ?? 0) === 0,
+                'deleteReason' => $role->name === 'super-admin' ? 'Role utama tidak dapat dihapus.' : ((int) ($userCounts[$role->id] ?? 0) > 0 ? 'Role masih digunakan oleh '.(int) ($userCounts[$role->id] ?? 0).' pengguna. Ganti role pengguna terlebih dahulu.' : ''),
                 'permissions' => $role->permissions->pluck('name')->values(),
             ]);
 

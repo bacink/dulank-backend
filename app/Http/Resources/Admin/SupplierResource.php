@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Admin;
 
 use App\Models\Supplier;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +21,7 @@ class SupplierResource extends JsonResource
             'id' => (string) $this->id,
             'supplierId' => $this->code,
             'name' => $this->name,
+            'photo' => app(MediaService::class)->url($this->photo_path),
             'email' => $this->email,
             'contact' => $this->contact,
             'picName' => $this->pic_name,
