@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminIndexRequest;
 use App\Http\Requests\Admin\StoreBankAccountRequest;
+use App\Http\Requests\Admin\StoreBankAccountTypeRequest;
+use App\Http\Requests\Admin\UpdateBankAccountRequest;
+use App\Http\Requests\Admin\UpdateBankAccountTypeRequest;
 use App\Http\Resources\Admin\BankAccountResource;
+use App\Http\Resources\Admin\BankAccountStatementResource;
 use App\Http\Resources\Admin\BankAccountTypeResource;
 use App\Http\Resources\Admin\BankLedgerEntryResource;
 use App\Models\BankAccount;
@@ -12,20 +17,24 @@ use App\Models\BankAccountType;
 use App\Services\BranchAccess;
 use App\Services\LedgerService;
 use App\Services\MasterDataService;
+use App\Services\BankAccountService;
+use App\Services\BankAccountTypeService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class BankAccountController extends Controller
 {
+    public function __construct(
+        private readonly BankAccountService $accounts,
+        private readonly BankAccountTypeService $types,
+    ) {}
+
     public function types(): JsonResponse
     {
-        $types = BankAccountType::query()->withCount('accounts')->orderBy('name')->get();
-
-        return ApiResponse::success(BankAccountTypeResource::collection($types));
+        return ApiResponse::success(BankAccountTypeResource::collection($this->types->list()));
     }
 
-    public function storeType(Request $request): JsonResponse
+    public function storeType(StoreBankAccountTypeRequest $request): JsonResponse
     {
         if ($id = $request->input('id')) {
             $bankAccountType = BankAccountType::query()->findOrFail($id);
@@ -42,46 +51,30 @@ class BankAccountController extends Controller
             'name' => $validated['name'],
             'status' => $validated['status'] ?? 'Active',
         ]);
+        $type = $this->types->create($request->validated());
 
         return ApiResponse::success(new BankAccountTypeResource($type), [], 201);
     }
 
-    public function updateType(Request $request, BankAccountType $bankAccountType): JsonResponse
+    public function updateType(UpdateBankAccountTypeRequest $request, BankAccountType $bankAccountType): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'status' => ['sometimes', 'nullable', 'in:Active,Inactive'],
-        ]);
+        $type = $this->types->update($bankAccountType, $request->validated());
 
-        $bankAccountType->forceFill([
-            'name' => $validated['name'],
-            'status' => $validated['status'] ?? $bankAccountType->status,
-        ])->save();
-
-        return ApiResponse::success(new BankAccountTypeResource($bankAccountType->refresh()));
+        return ApiResponse::success(new BankAccountTypeResource($type));
     }
 
     public function destroyType(BankAccountType $bankAccountType): JsonResponse
     {
-        $bankAccountType->delete();
+        $this->types->delete($bankAccountType);
 
         return ApiResponse::success(['id' => (string) $bankAccountType->id, 'removed' => true]);
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(AdminIndexRequest $request): JsonResponse
     {
-        $query = BankAccount::query()->with(['accountType', 'branch']);
+        $accounts = $this->accounts->list($request->input('search'));
 
-        $search = trim((string) $request->input('search', ''));
-        if ($search !== '') {
-            $query->where(function ($query) use ($search): void {
-                $query->where('account_name', 'like', '%'.$search.'%')
-                    ->orWhere('bank_name', 'like', '%'.$search.'%')
-                    ->orWhere('account_no', 'like', '%'.$search.'%');
-            });
-        }
-
-        return ApiResponse::success(BankAccountResource::collection($query->orderBy('account_name')->get()));
+        return ApiResponse::success(BankAccountResource::collection($accounts));
     }
 
     public function store(StoreBankAccountRequest $request): JsonResponse
@@ -108,9 +101,12 @@ class BankAccountController extends Controller
         ]);
 
         return ApiResponse::success(new BankAccountResource($account->load(['accountType', 'branch'])), [], 201);
+        $account = $this->accounts->create($request->validated());
+
+        return ApiResponse::success(new BankAccountResource($account), [], 201);
     }
 
-    public function update(StoreBankAccountRequest $request, BankAccount $bankAccount): JsonResponse
+    public function update(UpdateBankAccountRequest $request, BankAccount $bankAccount): JsonResponse
     {
         $validated = $request->validated();
         BranchAccess::assertAllowed($validated['branchId'] ?? $bankAccount->branch_id);
@@ -131,37 +127,27 @@ class BankAccountController extends Controller
         ])->save();
 
         return ApiResponse::success(new BankAccountResource($bankAccount->refresh()->load(['accountType', 'branch'])));
+        $account = $this->accounts->update($bankAccount, $request->validated());
+
+        return ApiResponse::success(new BankAccountResource($account));
     }
 
     public function destroy(BankAccount $bankAccount): JsonResponse
     {
         MasterDataService::assertDeletable($bankAccount);
         $bankAccount->delete();
+        $this->accounts->delete($bankAccount);
 
         return ApiResponse::success(['id' => (string) $bankAccount->id, 'removed' => true]);
     }
 
     public function ledger(BankAccount $bankAccount): JsonResponse
     {
-        $entries = $bankAccount->ledgerEntries()->orderByDesc('id')->limit(200)->get();
-
-        return ApiResponse::success(BankLedgerEntryResource::collection($entries));
+        return ApiResponse::success(BankLedgerEntryResource::collection($this->accounts->ledger($bankAccount)));
     }
 
-    public function statement(BankAccount $bankAccount, LedgerService $ledger): JsonResponse
+    public function statement(BankAccount $bankAccount): JsonResponse
     {
-        $credit = (int) $bankAccount->ledgerEntries()->where('direction', 'credit')->sum('amount');
-        $debit = (int) $bankAccount->ledgerEntries()->where('direction', 'debit')->sum('amount');
-
-        return ApiResponse::success([
-            'account' => new BankAccountResource($bankAccount->load(['accountType', 'branch'])),
-            'openingBalance' => (int) $bankAccount->opening_balance,
-            'totalCredit' => $credit,
-            'totalDebit' => $debit,
-            'currentBalance' => $ledger->balance($bankAccount),
-            'entries' => BankLedgerEntryResource::collection(
-                $bankAccount->ledgerEntries()->orderByDesc('id')->limit(200)->get()
-            ),
-        ]);
+        return ApiResponse::success(new BankAccountStatementResource($this->accounts->statement($bankAccount)));
     }
 }
